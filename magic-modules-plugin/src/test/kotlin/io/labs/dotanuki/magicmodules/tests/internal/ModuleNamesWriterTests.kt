@@ -1,6 +1,6 @@
-package io.labs.dotanuki.magicmodules.tests.writer
+package io.labs.dotanuki.magicmodules.tests.internal
 
-import io.labs.dotanuki.magicmodules.writer.ModuleNamesWriter
+import io.labs.dotanuki.magicmodules.internal.ModuleNamesWriter
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Before
@@ -40,7 +40,7 @@ internal class ModuleNamesWriterTests {
         assertThatThrownBy(execution).isInstanceOf(expected)
     }
 
-    @Test fun `write one module library`() {
+    @Test fun `should write names as constants and also each name inside a list`() {
         val target = tempFolder.newFolder()
         val names = listOf("core", "common")
         val filename = "Modules"

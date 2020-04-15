@@ -1,4 +1,4 @@
-package io.labs.dotanuki.magicmodules.writer
+package io.labs.dotanuki.magicmodules.internal
 
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
