@@ -10,13 +10,13 @@ import java.io.File
 
 internal class ModuleNamesWriter {
 
-    fun write(folder: File, filename: String, names: List<String>) {
+    fun write(folder: File, filename: String, moduleNames: List<String>) {
 
-        if (!folder.isDirectory) throw IllegalArgumentException(NOT_ACCEPTED_INPUT_FILE)
-
-        if (names.isEmpty()) throw IllegalArgumentException(NOT_ACCEPTED_LIST_OF_NAMES)
-
-        generateAndWriteKotlinCode(filename, names, folder)
+        when {
+            folder.isFile -> throw IllegalArgumentException(NOT_ACCEPTED_INPUT_FILE)
+            moduleNames.isEmpty() -> throw IllegalArgumentException(NOT_ACCEPTED_LIST_OF_NAMES)
+            else -> generateAndWriteKotlinCode(filename, moduleNames, folder)
+        }
     }
 
     private fun generateAndWriteKotlinCode(
