@@ -6,9 +6,9 @@ buildscript {
     }
 
     dependencies {
-        classpath(Dependencies.kotlinGradlePlugin)
-        classpath(Dependencies.testLoggerPlugin)
-        classpath(Dependencies.ktLintGradlePlugin)
+        classpath(Libraries.kotlinGradlePlugin)
+        classpath(Libraries.testLoggerPlugin)
+        classpath(Libraries.ktLintGradlePlugin)
     }
 }
 

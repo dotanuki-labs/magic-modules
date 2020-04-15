@@ -13,9 +13,12 @@ plugins {
 }
 
 dependencies {
-    implementation(Dependencies.kotlinStdLib)
-    testImplementation(Dependencies.junit)
-    testImplementation(Dependencies.assertj)
+    with(Libraries) {
+        implementation(kotlinStdLib)
+        implementation(kotlinPoet)
+        testImplementation(junit)
+        testImplementation(assertj)
+    }
 }
 
 tasks {
