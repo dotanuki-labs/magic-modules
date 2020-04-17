@@ -40,7 +40,8 @@ internal class ProjectStructureParser {
     private fun File.innerFiles(): List<File> = listFiles()?.toList() ?: emptyList()
 
     private fun File.evaluateProjectType(): GradleModuleType =
-        readText().let {
+        if (matchesBuildSrc()) GradleModuleType.BUILDSRC
+        else readText().let {
             when {
                 it.matchesApplicationProject() -> GradleModuleType.APPLICATION
                 it.matchesLibraryProject() -> GradleModuleType.LIBRARY
@@ -50,6 +51,8 @@ internal class ProjectStructureParser {
 
     private fun File.isBuildScript(): Boolean =
         path.endsWith("build.gradle") || path.endsWith("build.gradle.kts")
+
+    private fun File.matchesBuildSrc(): Boolean = path.contains("buildSrc")
 
     private fun String.matchesLibraryProject(): Boolean =
         contains("apply plugin: \"com.android.library\"") ||

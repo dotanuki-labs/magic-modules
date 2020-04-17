@@ -3,6 +3,7 @@ package io.labs.dotanuki.magicmodules.tests.internal
 import io.labs.dotanuki.magicmodules.internal.ProjectStructureParser
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.APPLICATION
+import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.BUILDSRC
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.ROOT_LEVEL
 import io.labs.dotanuki.magicmodules.internal.model.MagicModulesError
@@ -58,6 +59,7 @@ internal class ProjectStructureParserTests {
         val expected = with(target) {
             setOf(
                 GradleBuildScript(resolvePath("build.gradle"), ROOT_LEVEL),
+                GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
                 GradleBuildScript(resolvePath("app/build.gradle"), APPLICATION),
                 GradleBuildScript(resolvePath("common/build.gradle"), LIBRARY),
                 GradleBuildScript(resolvePath("feature/build.gradle"), LIBRARY)
@@ -75,6 +77,7 @@ internal class ProjectStructureParserTests {
         val expected = with(target) {
             setOf(
                 GradleBuildScript(resolvePath("build.gradle.kts"), ROOT_LEVEL),
+                GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
                 GradleBuildScript(resolvePath("app/build.gradle.kts"), APPLICATION),
                 GradleBuildScript(resolvePath("common/core/build.gradle.kts"), LIBRARY),
                 GradleBuildScript(resolvePath("common/utils/build.gradle"), LIBRARY),
