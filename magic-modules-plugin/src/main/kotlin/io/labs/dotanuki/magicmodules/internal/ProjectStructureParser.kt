@@ -2,6 +2,7 @@ package io.labs.dotanuki.magicmodules.internal
 
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType
+import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
 import io.labs.dotanuki.magicmodules.internal.model.MagicModulesError
 import java.io.File
 
@@ -11,13 +12,18 @@ internal class ProjectStructureParser {
         mutableSetOf<GradleBuildScript>()
     }
 
-    fun parse(rootFolder: File): Set<GradleBuildScript> =
+    private var projectName = NO_NAME_ASSIGNED
+
+    fun parse(rootFolder: File): GradleProjectStructure =
         when {
-            rootFolder.isDirectory -> deepSearchFirst(rootFolder)
+            rootFolder.isDirectory -> {
+                projectName = rootFolder.name
+                deepSearchFirst(rootFolder)
+            }
             else -> throw MagicModulesError.CantParseProjectStructure
         }
 
-    private fun deepSearchFirst(rootFolder: File): Set<GradleBuildScript> =
+    private fun deepSearchFirst(rootFolder: File): GradleProjectStructure =
         with(rootFolder) {
             innerFiles().forEach { innerFile ->
                 when {
@@ -26,7 +32,7 @@ internal class ProjectStructureParser {
                 }
             }
 
-            foundedScripts
+            GradleProjectStructure(projectName, foundedScripts)
         }
 
     private fun evaluateBuildScript(target: File) {
@@ -63,4 +69,8 @@ internal class ProjectStructureParser {
     private fun String.matchesApplicationProject(): Boolean =
         contains("apply plugin: \"com.android.application\"") ||
             contains("apply(plugin = \"com.android.application\")")
+
+    companion object {
+        const val NO_NAME_ASSIGNED = ""
+    }
 }

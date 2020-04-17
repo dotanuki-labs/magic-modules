@@ -6,6 +6,7 @@ import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.APPLICATION
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.BUILDSRC
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.ROOT_LEVEL
+import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
 import io.labs.dotanuki.magicmodules.internal.model.MagicModulesError
 import java.io.File
 import org.assertj.core.api.Assertions.assertThat
@@ -35,7 +36,7 @@ internal class ProjectStructureParserTests {
 
         val parsed = parser.parse(target)
 
-        val expected = emptySet<GradleBuildScript>()
+        val expected = GradleProjectStructure("no_gradle_projects", emptySet())
         assertThat(parsed).isEqualTo(expected)
     }
 
@@ -44,9 +45,11 @@ internal class ProjectStructureParserTests {
 
         val parsedProject = parser.parse(target)
 
-        val expected = setOf(
-            GradleBuildScript(target.resolvePath("build.gradle"), ROOT_LEVEL)
-        )
+        val expected =
+            GradleProjectStructure(
+                "single_module_on_root",
+                setOf(GradleBuildScript(target.resolvePath("build.gradle"), ROOT_LEVEL))
+            )
 
         assertThat(parsedProject).isEqualTo(expected)
     }
@@ -57,12 +60,16 @@ internal class ProjectStructureParserTests {
         val parsed = parser.parse(target)
 
         val expected = with(target) {
-            setOf(
-                GradleBuildScript(resolvePath("build.gradle"), ROOT_LEVEL),
-                GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
-                GradleBuildScript(resolvePath("app/build.gradle"), APPLICATION),
-                GradleBuildScript(resolvePath("common/build.gradle"), LIBRARY),
-                GradleBuildScript(resolvePath("feature/build.gradle"), LIBRARY)
+
+            GradleProjectStructure(
+                "multiple_modules_one_level",
+                setOf(
+                    GradleBuildScript(resolvePath("build.gradle"), ROOT_LEVEL),
+                    GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
+                    GradleBuildScript(resolvePath("app/build.gradle"), APPLICATION),
+                    GradleBuildScript(resolvePath("common/build.gradle"), LIBRARY),
+                    GradleBuildScript(resolvePath("feature/build.gradle"), LIBRARY)
+                )
             )
         }
 
@@ -75,14 +82,17 @@ internal class ProjectStructureParserTests {
         val parsed = parser.parse(target)
 
         val expected = with(target) {
-            setOf(
-                GradleBuildScript(resolvePath("build.gradle.kts"), ROOT_LEVEL),
-                GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
-                GradleBuildScript(resolvePath("app/build.gradle.kts"), APPLICATION),
-                GradleBuildScript(resolvePath("common/core/build.gradle.kts"), LIBRARY),
-                GradleBuildScript(resolvePath("common/utils/build.gradle"), LIBRARY),
-                GradleBuildScript(resolvePath("features/profile/build.gradle.kts"), LIBRARY),
-                GradleBuildScript(resolvePath("features/signup/build.gradle.kts"), LIBRARY)
+            GradleProjectStructure(
+                "multiple_modules_two_levels",
+                setOf(
+                    GradleBuildScript(resolvePath("build.gradle.kts"), ROOT_LEVEL),
+                    GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
+                    GradleBuildScript(resolvePath("app/build.gradle.kts"), APPLICATION),
+                    GradleBuildScript(resolvePath("common/core/build.gradle.kts"), LIBRARY),
+                    GradleBuildScript(resolvePath("common/utils/build.gradle"), LIBRARY),
+                    GradleBuildScript(resolvePath("features/profile/build.gradle.kts"), LIBRARY),
+                    GradleBuildScript(resolvePath("features/signup/build.gradle.kts"), LIBRARY)
+                )
             )
         }
 
