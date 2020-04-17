@@ -1,10 +1,10 @@
 package io.labs.dotanuki.magicmodules.internal.util
 
+import io.labs.dotanuki.magicmodules.internal.MagicModulesError.CantExtractGradleCoordinates
 import io.labs.dotanuki.magicmodules.internal.model.CanonicalModuleName
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleInclude
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType
-import io.labs.dotanuki.magicmodules.internal.MagicModulesError.CantExtractGradleCoordinates
 
 internal object ExtractCoordinates {
 
