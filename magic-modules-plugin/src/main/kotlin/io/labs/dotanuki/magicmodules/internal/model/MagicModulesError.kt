@@ -6,5 +6,5 @@ internal sealed class MagicModulesError(description: String) : RuntimeException(
     object CantWriteConstantsFile : MagicModulesError("File should be a directory")
     object CantAcceptModulesNames : MagicModulesError("List of names can not be empty")
     object MissingBuildSrc : MagicModulesError("This plugin requires a Gradle project with buildSrc")
-    object CantExtractGradleCoordinates : MagicModulesError("Something is wo")
+    object CantExtractGradleCoordinates : MagicModulesError("Can't extract Gradle coordinates")
 }
