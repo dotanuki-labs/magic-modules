@@ -8,4 +8,4 @@ root = true
 indent_style = space
 indent_size = 4
 continuation_indent_size = 4
-disabled_rules=final-newline
+disabled_rules=final-newline,import-ordering
