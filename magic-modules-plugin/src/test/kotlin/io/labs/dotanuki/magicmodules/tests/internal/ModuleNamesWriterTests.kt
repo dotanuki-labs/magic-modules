@@ -1,7 +1,7 @@
 package io.labs.dotanuki.magicmodules.tests.internal
 
 import io.labs.dotanuki.magicmodules.internal.ModuleNamesWriter
-import io.labs.dotanuki.magicmodules.internal.model.MagicModulesError
+import io.labs.dotanuki.magicmodules.internal.MagicModulesError
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Before

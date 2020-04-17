@@ -3,7 +3,6 @@ package io.labs.dotanuki.magicmodules.internal
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType
 import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
-import io.labs.dotanuki.magicmodules.internal.model.MagicModulesError
 import java.io.File
 
 internal class ProjectStructureParser {

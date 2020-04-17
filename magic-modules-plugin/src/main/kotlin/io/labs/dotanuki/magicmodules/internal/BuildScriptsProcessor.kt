@@ -6,7 +6,6 @@ import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.APPLICATION
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.BUILDSRC
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
-import io.labs.dotanuki.magicmodules.internal.model.MagicModulesError
 import io.labs.dotanuki.magicmodules.internal.model.ProcessedScriptsResult
 import io.labs.dotanuki.magicmodules.internal.util.ExtractCoordinates
 import io.labs.dotanuki.magicmodules.internal.util.i

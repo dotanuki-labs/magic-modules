@@ -1,4 +1,4 @@
-package io.labs.dotanuki.magicmodules.internal.model
+package io.labs.dotanuki.magicmodules.internal
 
 internal sealed class MagicModulesError(description: String) : RuntimeException(description) {
 

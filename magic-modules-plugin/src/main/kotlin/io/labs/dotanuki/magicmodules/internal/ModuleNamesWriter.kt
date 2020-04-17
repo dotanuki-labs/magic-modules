@@ -6,7 +6,6 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
-import io.labs.dotanuki.magicmodules.internal.model.MagicModulesError
 import java.io.File
 
 internal class ModuleNamesWriter {
