@@ -1,6 +1,7 @@
 package io.labs.dotanuki.magicmodules.tests.internal
 
 import io.labs.dotanuki.magicmodules.internal.ModuleNamesWriter
+import io.labs.dotanuki.magicmodules.internal.model.MagicModulesError
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Before
@@ -25,8 +26,8 @@ internal class ModuleNamesWriterTests {
 
         val execution = { writer.write(target, filename, names) }
 
-        val expected = IllegalArgumentException::class.java
-        assertThatThrownBy(execution).isInstanceOf(expected)
+        val expected = MagicModulesError.CantWriteConstantsFile
+        assertThatThrownBy(execution).isEqualTo(expected)
     }
 
     @Test fun `should not write when no names are provided`() {
@@ -36,8 +37,8 @@ internal class ModuleNamesWriterTests {
 
         val execution = { writer.write(target, filename, names) }
 
-        val expected = IllegalArgumentException::class.java
-        assertThatThrownBy(execution).isInstanceOf(expected)
+        val expected = MagicModulesError.CantAcceptModulesNames
+        assertThatThrownBy(execution).isEqualTo(expected)
     }
 
     @Test fun `should write names as constants and also each name inside a list`() {

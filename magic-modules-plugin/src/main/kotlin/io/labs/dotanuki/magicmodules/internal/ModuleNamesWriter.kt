@@ -6,6 +6,7 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import io.labs.dotanuki.magicmodules.internal.model.MagicModulesError
 import java.io.File
 
 internal class ModuleNamesWriter {
@@ -13,8 +14,8 @@ internal class ModuleNamesWriter {
     fun write(folder: File, filename: String, moduleNames: List<String>) {
 
         when {
-            folder.isFile -> throw IllegalArgumentException(NOT_ACCEPTED_INPUT_FILE)
-            moduleNames.isEmpty() -> throw IllegalArgumentException(NOT_ACCEPTED_LIST_OF_NAMES)
+            folder.isFile -> throw MagicModulesError.CantWriteConstantsFile
+            moduleNames.isEmpty() -> throw MagicModulesError.CantAcceptModulesNames
             else -> generateAndWriteKotlinCode(filename, moduleNames, folder)
         }
     }
@@ -68,8 +69,6 @@ internal class ModuleNamesWriter {
         }
 
     companion object {
-        const val NOT_ACCEPTED_INPUT_FILE = "File should be a directory"
-        const val NOT_ACCEPTED_LIST_OF_NAMES = "List of names can not be empty"
         const val FOUR_SPACES = "    "
         const val LINE_BY_LINE_SEPARATOR = ",\n$FOUR_SPACES"
         const val LINE_BY_LINE_PREFIX = "\n$FOUR_SPACES"
