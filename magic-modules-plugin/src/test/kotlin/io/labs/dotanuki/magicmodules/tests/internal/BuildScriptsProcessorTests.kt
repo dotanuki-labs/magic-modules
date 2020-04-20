@@ -56,14 +56,14 @@ class BuildScriptsProcessorTests {
         val expected = listOf(
             ProcessedScriptsResult(
                 moduleType = LIBRARY,
-                processedCoordinates = mapOf(
+                coordinates = mapOf(
                     CanonicalModuleName("CORE") to GradleModuleInclude(":core"),
                     CanonicalModuleName("LOGIN") to GradleModuleInclude(":login")
                 )
             ),
             ProcessedScriptsResult(
                 moduleType = APPLICATION,
-                processedCoordinates = mapOf(
+                coordinates = mapOf(
                     CanonicalModuleName("APP") to GradleModuleInclude(":app")
                 )
             )

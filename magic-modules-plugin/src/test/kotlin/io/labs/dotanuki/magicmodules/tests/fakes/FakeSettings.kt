@@ -78,6 +78,6 @@ class FakeSettings : Settings {
     override fun include(vararg modules: String) {
         modules.forEach { included += it }
     }
-    
+
     private fun notUsed(): Nothing = throw IllegalAccessException("Should not be called")
 }

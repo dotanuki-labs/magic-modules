@@ -6,7 +6,6 @@ import io.labs.dotanuki.magicmodules.internal.model.CanonicalModuleName
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleInclude
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -14,12 +13,6 @@ import org.junit.rules.TemporaryFolder
 internal class ModuleNamesWriterTests {
 
     @get:Rule val tempFolder = TemporaryFolder()
-
-    private lateinit var writer: ModuleNamesWriter
-
-    @Before fun `before each test`() {
-        writer = ModuleNamesWriter()
-    }
 
     @Test fun `should not write on non-directory file`() {
         val target = tempFolder.newFile()
@@ -31,7 +24,7 @@ internal class ModuleNamesWriterTests {
 
         val filename = "Libraries"
 
-        val execution = { writer.write(target, filename, coordinates) }
+        val execution = { ModuleNamesWriter.write(target, filename, coordinates) }
 
         val expected = MagicModulesError.CantWriteConstantsFile
         assertThatThrownBy(execution).isEqualTo(expected)
@@ -42,7 +35,7 @@ internal class ModuleNamesWriterTests {
         val coordinates = emptyMap<CanonicalModuleName, GradleModuleInclude>()
         val filename = "Modules"
 
-        val execution = { writer.write(target, filename, coordinates) }
+        val execution = { ModuleNamesWriter.write(target, filename, coordinates) }
 
         val expected = MagicModulesError.CantAcceptModulesNames
         assertThatThrownBy(execution).isEqualTo(expected)
@@ -58,7 +51,7 @@ internal class ModuleNamesWriterTests {
 
         val filename = "Modules"
 
-        writer.write(target, filename, coordinates)
+        ModuleNamesWriter.write(target, filename, coordinates)
 
         val writtenCode = target.resolve("$filename.kt").readText()
         val expectedCode = """
