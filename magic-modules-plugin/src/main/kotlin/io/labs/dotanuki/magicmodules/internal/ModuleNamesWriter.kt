@@ -6,27 +6,29 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import io.labs.dotanuki.magicmodules.internal.model.CanonicalModuleName
+import io.labs.dotanuki.magicmodules.internal.model.GradleModuleInclude
 import java.io.File
 
 internal class ModuleNamesWriter {
 
-    fun write(folder: File, filename: String, moduleNames: List<String>) {
+    fun write(folder: File, filename: String, processedCoordinates: Map<CanonicalModuleName, GradleModuleInclude>) {
 
         when {
             folder.isFile -> throw MagicModulesError.CantWriteConstantsFile
-            moduleNames.isEmpty() -> throw MagicModulesError.CantAcceptModulesNames
-            else -> generateAndWriteKotlinCode(filename, moduleNames, folder)
+            processedCoordinates.isEmpty() -> throw MagicModulesError.CantAcceptModulesNames
+            else -> generateAndWriteKotlinCode(filename, processedCoordinates, folder)
         }
     }
 
     private fun generateAndWriteKotlinCode(
         filename: String,
-        names: List<String>,
+        processedCoordinates: Map<CanonicalModuleName, GradleModuleInclude>,
         target: File
     ) {
         val objectWithConstantsSpec = TypeSpec.objectBuilder(filename)
-            .apply { names.asConstantsPropertiesSpec().forEach { addProperty(it) } }
-            .addProperty(names.asListPropertySpec())
+            .apply { processedCoordinates.asConstantsPropertiesSpec().forEach { addProperty(it) } }
+            .addProperty(processedCoordinates.keys.asListPropertySpec())
             .build()
 
         val fileSpec = FileSpec.builder(ROOT_PACKAGE, filename)
@@ -38,7 +40,7 @@ internal class ModuleNamesWriter {
         fileSpec.writeTo(target)
     }
 
-    private fun List<String>.asListPropertySpec(): PropertySpec =
+    private fun Set<CanonicalModuleName>.asListPropertySpec(): PropertySpec =
         ClassName("kotlin.collections", "List")
             .parameterizedBy(ClassName("kotlin", "String"))
             .let { parametrizedStringList ->
@@ -48,7 +50,7 @@ internal class ModuleNamesWriter {
                     prefix = LINE_BY_LINE_PREFIX,
                     postfix = LINE_BY_LINE_POSTFIX
                 ) { name ->
-                    name.enclosedWithQuotes()
+                    name.value.enclosedWithQuotes()
                 }
 
                 val formatted = "\n${ALL_NAMES_TEMPLATE.replace("<items>", lineByLine).trimIndent()}"
@@ -60,10 +62,10 @@ internal class ModuleNamesWriter {
 
     private fun String.enclosedWithQuotes() = "\"$this\""
 
-    private fun List<String>.asConstantsPropertiesSpec(): List<PropertySpec> =
-        map { moduleName ->
-            PropertySpec.builder(moduleName, String::class, KModifier.CONST)
-                .initializer("%S", moduleName)
+    private fun Map<CanonicalModuleName, GradleModuleInclude>.asConstantsPropertiesSpec(): List<PropertySpec> =
+        map { (name, include) ->
+            PropertySpec.builder(name.value, String::class, KModifier.CONST)
+                .initializer("%S", include.value)
                 .build()
         }
 

@@ -1,6 +1,7 @@
 package io.labs.dotanuki.magicmodules.tests.internal
 
 import io.labs.dotanuki.magicmodules.internal.BuildScriptsProcessor
+import io.labs.dotanuki.magicmodules.internal.MagicModulesError
 import io.labs.dotanuki.magicmodules.internal.model.CanonicalModuleName
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleInclude
@@ -9,7 +10,6 @@ import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.BUILDSRC
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.ROOT_LEVEL
 import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
-import io.labs.dotanuki.magicmodules.internal.MagicModulesError
 import io.labs.dotanuki.magicmodules.internal.model.ProcessedScriptsResult
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
