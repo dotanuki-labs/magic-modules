@@ -40,7 +40,7 @@ internal object ModuleNamesWriter {
             .build()
 
         fileSpec.writeTo(target)
-        logger().l("Wrote $filename at $target")
+        logger().l("Writter :: Generated Kotlin $filename file and wrote it at $target")
     }
 
     private fun Set<CanonicalModuleName>.asListPropertySpec(): PropertySpec =

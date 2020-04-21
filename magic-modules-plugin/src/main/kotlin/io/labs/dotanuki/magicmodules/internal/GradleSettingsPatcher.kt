@@ -13,7 +13,7 @@ internal object GradleSettingsPatcher {
             .map { it.value }
             .forEach { gradleInclude ->
                 target.include(gradleInclude)
-                logger().i("Added to Settings -> $gradleInclude")
+                logger().i("Patcher :: Included on settings.gradle -> $gradleInclude")
             }
     }
 }

@@ -37,12 +37,14 @@ class MagicModulesPluginTests {
             .withArguments("clean", ":app:assembleDebug", "--info")
             .build()
 
+        println(build.output)
+
         assertThat(build.output).run {
-            contains("Added to Settings -> :features:home")
-            contains("Added to Settings -> :features:login")
-            contains("Added to Settings -> :common:core")
-            contains("Added to Settings -> :common:utils")
-            contains("Added to Settings -> :app")
+            contains("Included on settings.gradle -> :features:home")
+            contains("Included on settings.gradle -> :features:login")
+            contains("Included on settings.gradle -> :common:core")
+            contains("Included on settings.gradle -> :common:utils")
+            contains("Included on settings.gradle -> :app")
             contains("BUILD SUCCESS")
         }
 

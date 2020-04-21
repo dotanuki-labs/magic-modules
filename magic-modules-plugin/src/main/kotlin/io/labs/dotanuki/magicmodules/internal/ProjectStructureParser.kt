@@ -3,6 +3,9 @@ package io.labs.dotanuki.magicmodules.internal
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType
 import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
+import io.labs.dotanuki.magicmodules.internal.util.e
+import io.labs.dotanuki.magicmodules.internal.util.i
+import io.labs.dotanuki.magicmodules.internal.util.logger
 import java.io.File
 
 internal class ProjectStructureParser {
@@ -17,9 +20,16 @@ internal class ProjectStructureParser {
         when {
             rootFolder.isDirectory -> {
                 projectName = rootFolder.name
-                deepSearchFirst(rootFolder)
+                deepSearchFirst(rootFolder).also {
+                    logger().i("Parser :: Project structure parsed with success!")
+                    logger().i("Parser :: Project name -> ${it.rootProjectName}")
+                    logger().i("Parser :: Total number of Gradle scripts found -> ${it.scripts.size}")
+                }
             }
-            else -> throw MagicModulesError.CantParseProjectStructure
+            else -> {
+                logger().e("Error -> Can't parsed this project structure. $rootFolder is not a directory")
+                throw MagicModulesError.CantParseProjectStructure
+            }
         }
 
     private fun deepSearchFirst(rootFolder: File): GradleProjectStructure =
