@@ -60,13 +60,17 @@ internal class ProjectStructureParser {
     private fun File.matchesBuildSrc(): Boolean = path.contains("buildSrc")
 
     private fun String.matchesLibraryProject(): Boolean =
-        contains("apply plugin: \"com.android.library\"") ||
-            contains("apply plugin: \"kotlin\"") ||
+        contains("apply plugin: \'com.android.library\'") ||
+            contains("apply plugin: \'kotlin\'") ||
             contains("apply(plugin = \"com.android.library\")") ||
-            contains("apply(plugin = \"kotlin\")")
+            contains("apply(plugin = \"kotlin\")") ||
+            contains("kotlin(\"jvm\")") ||
+            contains("kotlin(\'jvm\'") ||
+            contains("id(\'com.android.library\')") ||
+            contains("id(\"com.android.library\")")
 
     private fun String.matchesApplicationProject(): Boolean =
-        contains("apply plugin: \"com.android.application\"") ||
+        contains("apply plugin: \'com.android.application\'") ||
             contains("apply(plugin = \"com.android.application\")")
 
     companion object {
