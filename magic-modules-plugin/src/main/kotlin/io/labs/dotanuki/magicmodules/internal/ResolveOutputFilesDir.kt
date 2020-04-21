@@ -7,5 +7,5 @@ internal object ResolveOutputFilesDir {
 
     fun using(target: Settings): File = File("${target.settingsDir}/$OUTPUT_BUILD_SRC")
 
-    private const val OUTPUT_BUILD_SRC = "buildSrc/main/kotlin"
+    private const val OUTPUT_BUILD_SRC = "buildSrc/src/main/kotlin"
 }
