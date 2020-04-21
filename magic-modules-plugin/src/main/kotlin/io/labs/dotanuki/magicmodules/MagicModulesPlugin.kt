@@ -15,28 +15,32 @@ class MagicModulesPlugin : Plugin<Settings> {
 
     override fun apply(target: Settings) {
         logger().i("Started processing")
-
-        val spent = measureTimeMillis { computeModulesAndPatchSettings(target) }
-
-        logger().i("Done !!! Processing time -> $spent milliseconds (~ ${spent / 60000} minutes)")
+        val spent = measureTimeMillis { target.computeModulesAndPatchSettings() }
+        logger().i("Done!!! Processing time -> $spent milliseconds (~${spent / 60000} minutes)")
     }
 
-    private fun computeModulesAndPatchSettings(target: Settings) {
-        with(target) {
+    private fun Settings.computeModulesAndPatchSettings() {
 
-            val extension = extensions.create("magicModules", MagicModulesExtension::class.java)
-            val parsedStructure = ProjectStructureParser().parse(settingsDir)
-            val processedScripts = BuildScriptsProcessor.process(parsedStructure)
+        val extension = registerPluginExtension()
+        val parsedStructure = ProjectStructureParser().parse(settingsDir)
+        val processedScripts = BuildScriptsProcessor.process(parsedStructure)
 
+        gradle.settingsEvaluated {
             processedScripts
                 .forEach { processed ->
-                    GradleSettingsPatcher.patch(target, processed, extension)
+                    GradleSettingsPatcher.patch(this, processed, extension)
                     ModuleNamesWriter.write(
-                        folder = ResolveOutputFilesDir.using(settingsDir, extension),
+                        folder = ResolveOutputFilesDir.using(settingsDir),
                         filename = processed.moduleType.conventionedFileName(),
                         coordinates = processed.coordinates
                     )
                 }
         }
     }
+
+    private fun Settings.registerPluginExtension() =
+        extensions.create("magicModules", MagicModulesExtension::class.java).also {
+            logger().i("Plugin configuration")
+            logger().i("Include app modules -> ${it.includeApps}")
+        }
 }

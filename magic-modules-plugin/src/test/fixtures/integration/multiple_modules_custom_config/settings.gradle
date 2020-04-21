@@ -1,0 +1,20 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+
+    dependencies {
+        classpath 'io.labs.dotanuki:magic-modules-plugin:+'
+    }
+}
+
+rootProject.name='MagicModules'
+
+apply plugin: "io.labs.dotanuki.magicmodules"
+
+magicModules {
+    includeApps = false
+}
+
+include ':app'

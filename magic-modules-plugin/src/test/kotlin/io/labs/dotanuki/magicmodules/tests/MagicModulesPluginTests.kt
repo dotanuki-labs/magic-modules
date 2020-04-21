@@ -27,6 +27,26 @@ class MagicModulesPluginTests {
         }
     }
 
+    @Test fun `should include multiple modules with custom configuration`() {
+
+        val targetProjectDir = prepareFixture("multiple_modules_custom_config")
+
+        val build = GradleRunner.create()
+            .withProjectDir(targetProjectDir)
+            .withPluginClasspath()
+            .withArguments("clean", ":app:assembleDebug", "--info")
+            .build()
+
+        assertThat(build.output).run {
+            contains("Included on settings.gradle -> :home")
+            contains("Included on settings.gradle -> :login")
+            contains("Included on settings.gradle -> :core")
+            contains("Included on settings.gradle -> :utils")
+            doesNotContain("Included on settings.gradle -> :app")
+            contains("BUILD SUCCESS")
+        }
+    }
+
     @Test fun `should include multiple nested modules`() {
 
         val targetProjectDir = prepareFixture("multiple_nested_modules")
@@ -36,8 +56,6 @@ class MagicModulesPluginTests {
             .withPluginClasspath()
             .withArguments("clean", ":app:assembleDebug", "--info")
             .build()
-
-        println(build.output)
 
         assertThat(build.output).run {
             contains("Included on settings.gradle -> :features:home")
