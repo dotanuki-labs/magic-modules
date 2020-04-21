@@ -1,7 +1,3 @@
-
-// Custom buildscript to block in order to enable the MagicModules plugin be fetched
-// from the proper Maven repository
-
 buildscript {
     repositories {
         mavenCentral()
@@ -13,7 +9,13 @@ buildscript {
     }
 }
 
+rootProject.name='MagicModules'
+
 apply plugin: "io.labs.dotanuki.magicmodules"
 
-rootProject.name='demo'
+magicModules {
+    includeApps = false
+}
+
 include ':app'
+
