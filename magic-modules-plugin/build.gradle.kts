@@ -18,6 +18,7 @@ dependencies {
         implementation(kotlinPoet)
         testImplementation(junit)
         testImplementation(assertj)
+        testImplementation(gradleTestKit())
     }
 }
 
