@@ -14,9 +14,9 @@ import kotlin.system.measureTimeMillis
 class MagicModulesPlugin : Plugin<Settings> {
 
     override fun apply(target: Settings) {
-        logger().i("Started processing")
+        logger().i("Processing :: Started")
         val spent = measureTimeMillis { target.computeModulesAndPatchSettings() }
-        logger().i("Done!!! Processing time -> $spent milliseconds (~${spent / 60000} minutes)")
+        logger().i("Processing :: Done. Processing time -> $spent milliseconds")
     }
 
     private fun Settings.computeModulesAndPatchSettings() {
@@ -40,7 +40,6 @@ class MagicModulesPlugin : Plugin<Settings> {
 
     private fun Settings.registerPluginExtension() =
         extensions.create("magicModules", MagicModulesExtension::class.java).also {
-            logger().i("Plugin configuration")
-            logger().i("Include app modules -> ${it.includeApps}")
+            logger().i("Processing :: Plugin configuration -> Include app modules = ${it.includeApps}")
         }
 }

@@ -54,6 +54,6 @@ internal object BuildScriptsProcessor {
         }
 
     private fun reportSkipped(script: GradleBuildScript) {
-        logger().i("Skipping script -> ${script.filePath}")
+        logger().i("ScriptsProcessor :: Skipping script -> ${script.filePath}")
     }
 }

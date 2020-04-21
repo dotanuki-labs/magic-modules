@@ -8,7 +8,7 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import io.labs.dotanuki.magicmodules.internal.model.CanonicalModuleName
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleInclude
-import io.labs.dotanuki.magicmodules.internal.util.l
+import io.labs.dotanuki.magicmodules.internal.util.i
 import io.labs.dotanuki.magicmodules.internal.util.logger
 import java.io.File
 
@@ -40,7 +40,7 @@ internal object ModuleNamesWriter {
             .build()
 
         fileSpec.writeTo(target)
-        logger().l("Writter :: Generated Kotlin $filename file and wrote it at $target")
+        logger().i("Writter :: Wrote $filename.kt at $target")
     }
 
     private fun Set<CanonicalModuleName>.asListPropertySpec(): PropertySpec =
