@@ -23,17 +23,20 @@ class MagicModulesPlugin : Plugin<Settings> {
 
     private fun computeModulesAndPatchSettings(target: Settings) {
         with(target) {
+
+            val extension = extensions.create("magicModules", MagicModulesExtension::class.java)
             val parsedStructure = ProjectStructureParser().parse(settingsDir)
             val processedScripts = BuildScriptsProcessor.process(parsedStructure)
 
-            processedScripts.forEach {
-                GradleSettingsPatcher.patch(target, it.coordinates)
-                ModuleNamesWriter.write(
-                    folder = ResolveOutputFilesDir.using(target),
-                    filename = it.moduleType.conventionedFileName(),
-                    coordinates = it.coordinates
-                )
-            }
+            processedScripts
+                .forEach { processed ->
+                    GradleSettingsPatcher.patch(target, processed, extension)
+                    ModuleNamesWriter.write(
+                        folder = ResolveOutputFilesDir.using(settingsDir, extension),
+                        filename = processed.moduleType.conventionedFileName(),
+                        coordinates = processed.coordinates
+                    )
+                }
         }
     }
 }
