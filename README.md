@@ -1,5 +1,5 @@
 # Magic Modules
-![Main workflow](https://github.com/dotanuki-labs/magic-modules/workflows/Main%20workflow/badge.svg)
+![Main workflow](https://github.com/dotanuki-labs/magic-modules/workflows/Main%20workflow/badge.svg) [![](https://jitpack.io/v/dotanuki-labs/magic-modules.svg)](https://jitpack.io/#dotanuki-labs/magic-modules)
 
 ![](.github/assets/magicmodules-demo.gif)
 
@@ -116,16 +116,17 @@ dependencies {
 
 ## Setup
 
-Add this snippet in your `settings.gradle` file
+To try this plugin out, you can grab a snapshot build from Jitpack. Add this snippet in your `settings.gradle` file
 
 ```groovy
 buildscript {
     repositories {
-        maven { url 'https://jitpack.io' }
+    	mavenCentral()	
+		maven { url 'https://jitpack.io' }
     }
 
     dependencies {
-        classpath 'io.labs.dotanuki:magic-modules-plugin:<plugin_version>'
+        classpath 'com.github.dotanuki-labs:magic-modules:<plugin-version>'
     }
 }
 
@@ -162,7 +163,7 @@ include ':app'
 
 ## Matching Gradle build files
 
-This plugin walks your project tree and inspect all the `build.gradle` and `build.gradle.kts` files in order to learn if the related module matches an Android/JVM library or an Android application. This means that this plugin is sensitive on how you apply plugins in your `build.gradle` files
+This plugin walks your project tree and inspect all the `build.gradle` and `build.gradle.kts` files in order to learn if the related module matches an Android library, a JVM library or an Android application. This means that `Magic Modules` is sensitive on how you apply plugins in your Gradle build scripts, for instance using
 
 ```groovy
 apply plugin: 'com.android.library'
@@ -176,7 +177,10 @@ plugins {
 }
 ```
 
-This plugin does a best-effort attempt in order to catch all the common cases, but it might not work at all if you (1) have some strategy to share build logic accross Gradle modules and (2) define the applied plugin using such shared build logic
+This plugin does a best-effort attempt in order to catch all the common cases, but it might not work at all if you 
+
+- (1) have some strategy to share build logic accross Gradle modules and 
+- (2) applied the `application` or `library` plugin using such shared build logic
 
 ## Building and testing
 
@@ -194,9 +198,9 @@ To run all the checks, including integration tests
 
 ## Limitations
 
-The main limitation I've found with this approach is that - right now - the plugin generates the `Libraries.kt` and `Applications.kt` under the main source set of `buildSrc`, which means that eventually issues with Git and/or linters that run for `buildSrc` files.
+The main limitation I've found with this approach is that - right now - the plugin generates the `Libraries.kt` and `Applications.kt` under the main source set of `buildSrc`, which means eventually issues with linters that run for `buildSrc` files.
 
-I needed more work in order to figure out if we can have such generated files under `buildSrc/build` somehow.
+I need more time in order to figure out if we can have such generated files under `buildSrc/build` somehow.
 
 ## Further work
 
