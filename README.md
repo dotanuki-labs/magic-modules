@@ -121,8 +121,8 @@ To try this plugin out, you can grab a snapshot build from Jitpack. Add this sni
 ```groovy
 buildscript {
     repositories {
-		mavenCentral()	
-		maven { url 'https://jitpack.io' }
+        mavenCentral()	
+        maven { url 'https://jitpack.io' }
     }
 
     dependencies {
