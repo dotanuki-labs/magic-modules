@@ -2,6 +2,7 @@ package io.labs.dotanuki.magicmodules.tests
 
 import org.assertj.core.api.Assertions.assertThat
 import org.gradle.testkit.runner.GradleRunner
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -47,7 +48,7 @@ class MagicModulesPluginTests {
         }
     }
 
-    @Test fun `should include multiple nested modules`() {
+    @Ignore @Test fun `should include multiple nested modules`() {
 
         val targetProjectDir = prepareFixture("multiple_nested_modules")
 
