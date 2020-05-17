@@ -29,3 +29,9 @@ jobs:
 
       - name: Assemble and Test
         run: ./gradlew build --no-daemon
+
+      - name: Unit tests results
+        uses: actions/upload-artifact@v1
+        with:
+          name: unit-tests-results
+          path: magic-modules/magic-modules-plugin/build/reports/tests/test/index.html
