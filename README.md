@@ -5,7 +5,7 @@
 
 ## What is this?
 
-> *Blog post with the full motivation to come! Stay tunned*
+> *Read more in the [blog post](https://ubiratansoares.dev/post/an-experiment-around-gradle-modules-and-settings/)*
 
 For large Android projects hosted in mono repos, management for module names might be a real pain, specially when we have lots of moving parts under a structure driven by nested Gradle subprojects.
 
