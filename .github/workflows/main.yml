@@ -1,4 +1,4 @@
-name: Main workflow
+name: Main
 
 on: [push]
 
@@ -17,7 +17,7 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('buildSrc/src/main/kotlin/Dependencies.kt') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-
+            ${{ runner.os }}-gradle-${{ hashFiles('buildSrc/src/main/kotlin/Dependencies.kt') }}
 
       - name: Setup JDK 1.8
         uses: actions/setup-java@v1
