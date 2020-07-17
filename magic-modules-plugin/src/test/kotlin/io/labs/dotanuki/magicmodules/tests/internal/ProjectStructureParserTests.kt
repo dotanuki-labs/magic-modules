@@ -1,5 +1,6 @@
 package io.labs.dotanuki.magicmodules.tests.internal
 
+import io.labs.dotanuki.magicmodules.MagicModulesExtension
 import io.labs.dotanuki.magicmodules.internal.MagicModulesError
 import io.labs.dotanuki.magicmodules.internal.ProjectStructureParser
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
@@ -19,7 +20,7 @@ internal class ProjectStructureParserTests {
     private lateinit var parser: ProjectStructureParser
 
     @Before fun `before each test`() {
-        parser = ProjectStructureParser()
+        parser = ProjectStructureParser(MagicModulesExtension.DEFAULT)
     }
 
     @Test fun `should throw if input is not a directory`() {

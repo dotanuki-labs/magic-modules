@@ -3,7 +3,7 @@
  */
 
 object Versions {
-    const val kotlin = "1.3.70"
+    const val kotlin = "1.3.72"
     const val kotlinPoet = "1.5.0"
     const val ktlintGradlePlugin = "9.2.1"
     const val testLoggerPlugin = "2.0.0"

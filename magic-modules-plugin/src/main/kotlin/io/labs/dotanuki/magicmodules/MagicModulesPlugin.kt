@@ -20,12 +20,10 @@ class MagicModulesPlugin : Plugin<Settings> {
     }
 
     private fun Settings.computeModulesAndPatchSettings() {
-
         val extension = registerPluginExtension()
-        val parsedStructure = ProjectStructureParser().parse(settingsDir)
-        val processedScripts = BuildScriptsProcessor.process(parsedStructure)
-
         gradle.settingsEvaluated {
+            val parsedStructure = ProjectStructureParser(extension).parse(settingsDir)
+            val processedScripts = BuildScriptsProcessor.process(parsedStructure)
             processedScripts
                 .forEach { processed ->
                     GradleSettingsPatcher.patch(this, processed, extension)

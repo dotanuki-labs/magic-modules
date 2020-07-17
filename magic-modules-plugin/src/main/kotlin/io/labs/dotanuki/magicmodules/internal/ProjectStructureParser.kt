@@ -1,5 +1,6 @@
 package io.labs.dotanuki.magicmodules.internal
 
+import io.labs.dotanuki.magicmodules.MagicModulesExtension
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType
 import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
@@ -8,7 +9,7 @@ import io.labs.dotanuki.magicmodules.internal.util.i
 import io.labs.dotanuki.magicmodules.internal.util.logger
 import java.io.File
 
-internal class ProjectStructureParser {
+internal class ProjectStructureParser(private val magicModulesExtension: MagicModulesExtension) {
 
     private val foundedScripts by lazy {
         mutableSetOf<GradleBuildScript>()
@@ -56,37 +57,28 @@ internal class ProjectStructureParser {
 
     private fun File.evaluateProjectType(): GradleModuleType =
         if (matchesBuildSrc()) GradleModuleType.BUILDSRC
-        else readText().let {
-            when {
-                it.matchesApplicationProject() -> GradleModuleType.APPLICATION
-                it.matchesLibraryProject() -> GradleModuleType.LIBRARY
-                else -> GradleModuleType.ROOT_LEVEL
-            }
-        }
+        else readLines().let(::mapLines)
 
     private fun File.isBuildScript(): Boolean =
         path.endsWith("build.gradle") || path.endsWith("build.gradle.kts")
 
     private fun File.matchesBuildSrc(): Boolean = path.contains("buildSrc")
 
-    private fun String.matchesLibraryProject(): Boolean =
-        contains("apply plugin: \'kotlin\'") ||
-            contains("apply plugin: \"kotlin\"") ||
-            contains("apply(plugin = \"kotlin\")") ||
-            contains("kotlin(\'jvm\'") ||
-            contains("kotlin(\"jvm\")") ||
-            contains("apply plugin: \'com.android.library\'") ||
-            contains("apply plugin: \"com.android.library\"") ||
-            contains("apply(plugin = \"com.android.library\")") ||
-            contains("id(\'com.android.library\')") ||
-            contains("id(\"com.android.library\")")
-
-    private fun String.matchesApplicationProject(): Boolean =
-        contains("apply plugin: \'com.android.application\'") ||
-            contains("apply plugin: \"com.android.application\"") ||
-            contains("apply(plugin = \"com.android.application\")")
+    private fun mapLines(lines: List<String>): GradleModuleType = lines.asSequence()
+        .filter { line -> PLUGIN_LINE_REGEX.find(line) != null }
+        .mapNotNull { line ->
+            when {
+                line.contains(magicModulesExtension.rawApplicationPlugin) -> GradleModuleType.APPLICATION
+                magicModulesExtension.rawLibraryPlugins.any { library ->
+                    line.contains(library)
+                } -> GradleModuleType.LIBRARY
+                else -> null
+            }
+        }
+        .firstOrNull() ?: GradleModuleType.ROOT_LEVEL
 
     companion object {
         const val NO_NAME_ASSIGNED = ""
+        val PLUGIN_LINE_REGEX = """^\s*(apply|id|kotlin)(\(|\s)*(plugin)?\s*[:=]?\s*['"]?""".toRegex()
     }
 }
