@@ -23,7 +23,8 @@ class MagicModulesPluginTests {
             .buildAndFail()
 
         assertThat(build.output).run {
-            contains("Failed to apply plugin [id 'io.labs.dotanuki.magicmodules']")
+            //contains("Failed to apply plugin [id 'io.labs.dotanuki.magicmodules']")
+            contains("has no buildSrc build folder defined")
             contains("BUILD FAILED")
         }
     }
