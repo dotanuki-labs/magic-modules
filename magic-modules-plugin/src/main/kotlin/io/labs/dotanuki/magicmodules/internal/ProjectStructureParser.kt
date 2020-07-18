@@ -78,7 +78,7 @@ internal class ProjectStructureParser(private val magicModulesExtension: MagicMo
         .firstOrNull() ?: GradleModuleType.ROOT_LEVEL
 
     companion object {
-        const val NO_NAME_ASSIGNED = ""
-        val PLUGIN_LINE_REGEX = """^\s*(apply|id|kotlin)(\(|\s)*(plugin)?\s*[:=]?\s*['"]?""".toRegex()
+        private const val NO_NAME_ASSIGNED = ""
+        private val PLUGIN_LINE_REGEX = """^\s*((apply\s*\(?\s*plugin)|(id\s*\()|(kotlin\s*\())""".toRegex()
     }
 }
