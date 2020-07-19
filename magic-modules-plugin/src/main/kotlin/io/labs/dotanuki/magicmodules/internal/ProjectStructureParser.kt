@@ -2,6 +2,7 @@ package io.labs.dotanuki.magicmodules.internal
 
 import io.labs.dotanuki.magicmodules.MagicModulesExtension
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
+import io.labs.dotanuki.magicmodules.internal.model.GradleFoundModule
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType
 import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
 import io.labs.dotanuki.magicmodules.internal.util.e
@@ -58,8 +59,8 @@ internal class ProjectStructureParser(private val magicModulesExtension: MagicMo
     private fun File.evaluateProjectType(): GradleModuleType =
         if (matchesBuildSrc()) GradleModuleType.BUILDSRC
         else readLines().asSequence()
-            .mapNotNull(::mapPluginLine)
-            .mapNotNull(::mapLineToModuleType)
+            .mapNotNull(::mapScriptLine)
+            .mapNotNull(::mapFoundModule)
             .firstOrNull() ?: GradleModuleType.ROOT_LEVEL
 
     private fun File.isBuildScript(): Boolean =
@@ -67,22 +68,39 @@ internal class ProjectStructureParser(private val magicModulesExtension: MagicMo
 
     private fun File.matchesBuildSrc(): Boolean = path.contains("buildSrc")
 
-    private fun mapPluginLine(line: String): String? =
-        PLUGIN_LINE_REGEX.find(line)?.let { match -> line.substring(match.range.last) }
-
-    private fun mapLineToModuleType(line: String): GradleModuleType? = with(magicModulesExtension) {
-        when {
-            rawApplicationPlugin.checkPluginLineType(line) -> GradleModuleType.APPLICATION
-            rawLibraryPlugins.checkPluginLineType(line) -> GradleModuleType.LIBRARY
-            else -> null
+    private fun mapScriptLine(line: String): GradleFoundModule? {
+        val pluginFound = PLUGIN_LINE_REGEX.find(line)
+        return when {
+            pluginFound != null ->
+                GradleFoundModule.AppliedPlugin(line.substring(pluginFound.range.last))
+            magicModulesExtension.rawLibraryUsingApplyFrom.isEmpty() -> null
+            else -> APPLY_FROM_LINE_REGEX.find(line)?.let { match ->
+                GradleFoundModule.AppliedFrom(line.substring(match.range.last))
+            }
         }
     }
 
-    private fun List<String>.checkPluginLineType(line: String) =
-        any { plugin -> line.contains(plugin) }
+    private fun mapFoundModule(module: GradleFoundModule): GradleModuleType? =
+        with(magicModulesExtension) {
+            when (module) {
+                is GradleFoundModule.AppliedFrom -> when {
+                    module.isAPlugin(rawLibraryUsingApplyFrom) -> GradleModuleType.LIBRARY
+                    else -> null
+                }
+                is GradleFoundModule.AppliedPlugin -> when {
+                    module.isAPlugin(rawApplicationPlugin) -> GradleModuleType.APPLICATION
+                    module.isAPlugin(rawLibraryPlugins) -> GradleModuleType.LIBRARY
+                    else -> null
+                }
+            }
+        }
+
+    private fun GradleFoundModule.isAPlugin(plugins: List<String>) =
+        plugins.any { plugin -> content.contains(plugin) }
 
     companion object {
         private const val NO_NAME_ASSIGNED = ""
+        private val APPLY_FROM_LINE_REGEX = """^\s*apply\s*\(?from\s*[:=]\s*['"]?""".toRegex()
         private val PLUGIN_LINE_REGEX =
             """^\s*((apply\s*\(?\s*plugin)|(id\s*[('"])|(kotlin\s*\())""".toRegex()
     }

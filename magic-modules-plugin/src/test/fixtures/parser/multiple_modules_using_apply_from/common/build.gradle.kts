@@ -1,0 +1,1 @@
+apply(from = "../shared_library.gradle")

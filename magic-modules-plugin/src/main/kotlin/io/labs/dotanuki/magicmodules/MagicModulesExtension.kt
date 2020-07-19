@@ -6,6 +6,7 @@ open class MagicModulesExtension {
     var rawLibraryPlugins: List<String> = listOf(
         "com.android.library", "kotlin", "com.android.dynamic-feature", "jvm"
     )
+    var rawLibraryUsingApplyFrom: List<String> = emptyList()
 
     companion object {
         val DEFAULT = MagicModulesExtension()

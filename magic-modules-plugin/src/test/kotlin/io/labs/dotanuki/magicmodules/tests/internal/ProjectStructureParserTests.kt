@@ -121,6 +121,30 @@ internal class ProjectStructureParserTests {
         assertThat(parsed).isEqualTo(expected)
     }
 
+    @Test fun `should parse multiple modules project using apply from`() {
+        val target = fixture("multiple_modules_using_apply_from")
+
+        val extension = MagicModulesExtension.DEFAULT.apply {
+            rawLibraryUsingApplyFrom = listOf("../shared_library.gradle")
+        }
+        val parsed = ProjectStructureParser(extension).parse(target)
+
+        val expected = with(target) {
+            GradleProjectStructure(
+                "multiple_modules_using_apply_from",
+                setOf(
+                    GradleBuildScript(resolvePath("build.gradle"), ROOT_LEVEL),
+                    GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
+                    GradleBuildScript(resolvePath("app/build.gradle"), APPLICATION),
+                    GradleBuildScript(resolvePath("common/build.gradle.kts"), LIBRARY),
+                    GradleBuildScript(resolvePath("feature/build.gradle"), LIBRARY)
+                )
+            )
+        }
+
+        assertThat(parsed).isEqualTo(expected)
+    }
+
     private fun File.resolvePath(relativePath: String): String = resolve(relativePath).path
 
     private fun fixture(name: String): File = File("$FIXTURES_FOLDER/$name")
