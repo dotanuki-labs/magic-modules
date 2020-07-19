@@ -57,28 +57,33 @@ internal class ProjectStructureParser(private val magicModulesExtension: MagicMo
 
     private fun File.evaluateProjectType(): GradleModuleType =
         if (matchesBuildSrc()) GradleModuleType.BUILDSRC
-        else readLines().let(::mapLines)
+        else readLines().asSequence()
+            .mapNotNull(::mapPluginLine)
+            .mapNotNull(::mapLineToModuleType)
+            .firstOrNull() ?: GradleModuleType.ROOT_LEVEL
 
     private fun File.isBuildScript(): Boolean =
         path.endsWith("build.gradle") || path.endsWith("build.gradle.kts")
 
     private fun File.matchesBuildSrc(): Boolean = path.contains("buildSrc")
 
-    private fun mapLines(lines: List<String>): GradleModuleType = lines.asSequence()
-        .filter { line -> PLUGIN_LINE_REGEX.find(line) != null }
-        .mapNotNull { line ->
-            when {
-                line.contains(magicModulesExtension.rawApplicationPlugin) -> GradleModuleType.APPLICATION
-                magicModulesExtension.rawLibraryPlugins.any { library ->
-                    line.contains(library)
-                } -> GradleModuleType.LIBRARY
-                else -> null
-            }
+    private fun mapPluginLine(line: String): String? =
+        PLUGIN_LINE_REGEX.find(line)?.let { match -> line.substring(match.range.last) }
+
+    private fun mapLineToModuleType(line: String): GradleModuleType? = with(magicModulesExtension) {
+        when {
+            rawApplicationPlugin.checkPluginLineType(line) -> GradleModuleType.APPLICATION
+            rawLibraryPlugins.checkPluginLineType(line) -> GradleModuleType.LIBRARY
+            else -> null
         }
-        .firstOrNull() ?: GradleModuleType.ROOT_LEVEL
+    }
+
+    private fun List<String>.checkPluginLineType(line: String) =
+        any { plugin -> line.contains(plugin) }
 
     companion object {
         private const val NO_NAME_ASSIGNED = ""
-        private val PLUGIN_LINE_REGEX = """^\s*((apply\s*\(?\s*plugin)|(id\s*[('"])|(kotlin\s*\())""".toRegex()
+        private val PLUGIN_LINE_REGEX =
+            """^\s*((apply\s*\(?\s*plugin)|(id\s*[('"])|(kotlin\s*\())""".toRegex()
     }
 }

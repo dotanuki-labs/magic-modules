@@ -100,6 +100,27 @@ internal class ProjectStructureParserTests {
         assertThat(parsed).isEqualTo(expected)
     }
 
+    @Test fun `should parse multiple application modules project`() {
+        val target = fixture("multiple_application_modules")
+
+        val parsed = parser.parse(target)
+
+        val expected = with(target) {
+            GradleProjectStructure(
+                "multiple_application_modules",
+                setOf(
+                    GradleBuildScript(resolvePath("build.gradle"), ROOT_LEVEL),
+                    GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
+                    GradleBuildScript(resolvePath("app/build.gradle"), APPLICATION),
+                    GradleBuildScript(resolvePath("app2/build.gradle"), APPLICATION),
+                    GradleBuildScript(resolvePath("app3/build.gradle"), APPLICATION)
+                )
+            )
+        }
+
+        assertThat(parsed).isEqualTo(expected)
+    }
+
     private fun File.resolvePath(relativePath: String): String = resolve(relativePath).path
 
     private fun fixture(name: String): File = File("$FIXTURES_FOLDER/$name")
