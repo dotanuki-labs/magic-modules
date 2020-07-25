@@ -1,14 +1,18 @@
 package io.labs.dotanuki.magicmodules.internal
 
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
+import io.labs.dotanuki.magicmodules.internal.model.GradleFoundModule
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType
 import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
+import io.labs.dotanuki.magicmodules.internal.model.ParserRawContent
 import io.labs.dotanuki.magicmodules.internal.util.e
 import io.labs.dotanuki.magicmodules.internal.util.i
 import io.labs.dotanuki.magicmodules.internal.util.logger
 import java.io.File
 
-internal class ProjectStructureParser {
+internal class ProjectStructureParser(
+    private val parserRawContent: ParserRawContent
+) {
 
     private val foundedScripts by lazy {
         mutableSetOf<GradleBuildScript>()
@@ -56,37 +60,50 @@ internal class ProjectStructureParser {
 
     private fun File.evaluateProjectType(): GradleModuleType =
         if (matchesBuildSrc()) GradleModuleType.BUILDSRC
-        else readText().let {
-            when {
-                it.matchesApplicationProject() -> GradleModuleType.APPLICATION
-                it.matchesLibraryProject() -> GradleModuleType.LIBRARY
-                else -> GradleModuleType.ROOT_LEVEL
-            }
-        }
+        else readLines().asSequence()
+            .mapNotNull(::mapScriptLine)
+            .mapNotNull(::mapFoundModule)
+            .firstOrNull() ?: GradleModuleType.ROOT_LEVEL
 
     private fun File.isBuildScript(): Boolean =
         path.endsWith("build.gradle") || path.endsWith("build.gradle.kts")
 
     private fun File.matchesBuildSrc(): Boolean = path.contains("buildSrc")
 
-    private fun String.matchesLibraryProject(): Boolean =
-        contains("apply plugin: \'kotlin\'") ||
-            contains("apply plugin: \"kotlin\"") ||
-            contains("apply(plugin = \"kotlin\")") ||
-            contains("kotlin(\'jvm\'") ||
-            contains("kotlin(\"jvm\")") ||
-            contains("apply plugin: \'com.android.library\'") ||
-            contains("apply plugin: \"com.android.library\"") ||
-            contains("apply(plugin = \"com.android.library\")") ||
-            contains("id(\'com.android.library\')") ||
-            contains("id(\"com.android.library\")")
+    private fun mapScriptLine(line: String): GradleFoundModule? {
+        val pluginFound = PLUGIN_LINE_REGEX.find(line)
+        return when {
+            pluginFound != null ->
+                GradleFoundModule.ApplyPlugin(line.substring(pluginFound.range.last))
+            parserRawContent.rawLibraryUsingApplyFrom.isEmpty() -> null
+            else -> APPLY_FROM_LINE_REGEX.find(line)?.let { match ->
+                GradleFoundModule.ApplyFrom(line.substring(match.range.last))
+            }
+        }
+    }
 
-    private fun String.matchesApplicationProject(): Boolean =
-        contains("apply plugin: \'com.android.application\'") ||
-            contains("apply plugin: \"com.android.application\"") ||
-            contains("apply(plugin = \"com.android.application\")")
+    private fun mapFoundModule(module: GradleFoundModule): GradleModuleType? =
+        with(parserRawContent) {
+            when (module) {
+                is GradleFoundModule.ApplyFrom -> when {
+                    module.isAPlugin(rawLibraryUsingApplyFrom) -> GradleModuleType.LIBRARY
+                    else -> null
+                }
+                is GradleFoundModule.ApplyPlugin -> when {
+                    module.isAPlugin(rawApplicationPlugin) -> GradleModuleType.APPLICATION
+                    module.isAPlugin(rawLibraryPlugins) -> GradleModuleType.LIBRARY
+                    else -> null
+                }
+            }
+        }
+
+    private fun GradleFoundModule.isAPlugin(plugins: List<String>) =
+        plugins.any { plugin -> content.contains(plugin) }
 
     companion object {
-        const val NO_NAME_ASSIGNED = ""
+        private const val NO_NAME_ASSIGNED = ""
+        private val APPLY_FROM_LINE_REGEX = """^\s*apply\s*\(?from\s*[:=]\s*['"]?""".toRegex()
+        private val PLUGIN_LINE_REGEX =
+            """^\s*((apply\s*\(?\s*plugin)|(id\s*[('"])|(kotlin\s*\())""".toRegex()
     }
 }

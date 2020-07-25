@@ -1,5 +1,6 @@
 package io.labs.dotanuki.magicmodules.tests.internal
 
+import io.labs.dotanuki.magicmodules.MagicModulesExtension
 import io.labs.dotanuki.magicmodules.internal.MagicModulesError
 import io.labs.dotanuki.magicmodules.internal.ProjectStructureParser
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
@@ -8,6 +9,7 @@ import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.BUILDSRC
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.ROOT_LEVEL
 import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
+import io.labs.dotanuki.magicmodules.internal.model.ParserRawContent
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Before
@@ -19,7 +21,12 @@ internal class ProjectStructureParserTests {
     private lateinit var parser: ProjectStructureParser
 
     @Before fun `before each test`() {
-        parser = ProjectStructureParser()
+        val extension = MagicModulesExtension.DEFAULT
+        parser = ProjectStructureParser(ParserRawContent(
+            rawApplicationPlugin = extension.rawApplicationPlugin,
+            rawLibraryPlugins = extension.rawLibraryPlugins,
+            rawLibraryUsingApplyFrom = extension.rawLibraryUsingApplyFrom
+        ))
     }
 
     @Test fun `should throw if input is not a directory`() {
@@ -92,6 +99,57 @@ internal class ProjectStructureParserTests {
                     GradleBuildScript(resolvePath("common/utils/build.gradle"), LIBRARY),
                     GradleBuildScript(resolvePath("features/profile/build.gradle.kts"), LIBRARY),
                     GradleBuildScript(resolvePath("features/signup/build.gradle.kts"), LIBRARY)
+                )
+            )
+        }
+
+        assertThat(parsed).isEqualTo(expected)
+    }
+
+    @Test fun `should parse multiple application modules project`() {
+        val target = fixture("multiple_application_modules")
+
+        val parsed = parser.parse(target)
+
+        val expected = with(target) {
+            GradleProjectStructure(
+                "multiple_application_modules",
+                setOf(
+                    GradleBuildScript(resolvePath("build.gradle"), ROOT_LEVEL),
+                    GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
+                    GradleBuildScript(resolvePath("app/build.gradle"), APPLICATION),
+                    GradleBuildScript(resolvePath("app2/build.gradle"), APPLICATION),
+                    GradleBuildScript(resolvePath("app3/build.gradle"), APPLICATION)
+                )
+            )
+        }
+
+        assertThat(parsed).isEqualTo(expected)
+    }
+
+    @Test fun `should parse multiple modules project using apply from`() {
+        val target = fixture("multiple_modules_using_apply_from")
+
+        val extension = MagicModulesExtension.DEFAULT.apply {
+            rawLibraryUsingApplyFrom = listOf("../shared_library.gradle")
+        }
+        val parsed = ProjectStructureParser(
+            ParserRawContent(
+                rawApplicationPlugin = extension.rawApplicationPlugin,
+                rawLibraryPlugins = extension.rawLibraryPlugins,
+                rawLibraryUsingApplyFrom = extension.rawLibraryUsingApplyFrom
+            )
+        ).parse(target)
+
+        val expected = with(target) {
+            GradleProjectStructure(
+                "multiple_modules_using_apply_from",
+                setOf(
+                    GradleBuildScript(resolvePath("build.gradle"), ROOT_LEVEL),
+                    GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
+                    GradleBuildScript(resolvePath("app/build.gradle"), APPLICATION),
+                    GradleBuildScript(resolvePath("common/build.gradle.kts"), LIBRARY),
+                    GradleBuildScript(resolvePath("feature/build.gradle"), LIBRARY)
                 )
             )
         }
