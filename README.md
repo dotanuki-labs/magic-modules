@@ -216,11 +216,14 @@ I need more time in order to figure out if we can have such generated files unde
 I realised that
 
 - It might be useful to configure the output folder/package for `Libraries.kt` and `Applications.kt`
-- It might be useful to grab more Gradle build script matchers using the plugin configuration
 
 ## Author
 
 Coded by Ubiratan Soares (follow me on [Twitter](https://twitter.com/ubiratanfsoares))
+
+## Contributors
+
+- Thiago Santos (@programadorthi)
 
 ## License
 
