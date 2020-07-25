@@ -9,6 +9,7 @@ import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.BUILDSRC
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.ROOT_LEVEL
 import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
+import io.labs.dotanuki.magicmodules.internal.model.ParserRawContent
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Before
@@ -20,7 +21,12 @@ internal class ProjectStructureParserTests {
     private lateinit var parser: ProjectStructureParser
 
     @Before fun `before each test`() {
-        parser = ProjectStructureParser(MagicModulesExtension.DEFAULT)
+        val extension = MagicModulesExtension.DEFAULT
+        parser = ProjectStructureParser(ParserRawContent(
+            rawApplicationPlugin = extension.rawApplicationPlugin,
+            rawLibraryPlugins = extension.rawLibraryPlugins,
+            rawLibraryUsingApplyFrom = extension.rawLibraryUsingApplyFrom
+        ))
     }
 
     @Test fun `should throw if input is not a directory`() {
@@ -127,7 +133,13 @@ internal class ProjectStructureParserTests {
         val extension = MagicModulesExtension.DEFAULT.apply {
             rawLibraryUsingApplyFrom = listOf("../shared_library.gradle")
         }
-        val parsed = ProjectStructureParser(extension).parse(target)
+        val parsed = ProjectStructureParser(
+            ParserRawContent(
+                rawApplicationPlugin = extension.rawApplicationPlugin,
+                rawLibraryPlugins = extension.rawLibraryPlugins,
+                rawLibraryUsingApplyFrom = extension.rawLibraryUsingApplyFrom
+            )
+        ).parse(target)
 
         val expected = with(target) {
             GradleProjectStructure(

@@ -5,6 +5,7 @@ import io.labs.dotanuki.magicmodules.internal.GradleSettingsPatcher
 import io.labs.dotanuki.magicmodules.internal.ModuleNamesWriter
 import io.labs.dotanuki.magicmodules.internal.ProjectStructureParser
 import io.labs.dotanuki.magicmodules.internal.ResolveOutputFilesDir
+import io.labs.dotanuki.magicmodules.internal.model.ParserRawContent
 import io.labs.dotanuki.magicmodules.internal.util.i
 import io.labs.dotanuki.magicmodules.internal.util.logger
 import org.gradle.api.Plugin
@@ -22,17 +23,23 @@ class MagicModulesPlugin : Plugin<Settings> {
     private fun Settings.computeModulesAndPatchSettings() {
         val extension = registerPluginExtension()
         gradle.settingsEvaluated {
-            val parsedStructure = ProjectStructureParser(extension).parse(settingsDir)
+            val structureParser = ProjectStructureParser(
+                ParserRawContent(
+                    rawApplicationPlugin = extension.rawApplicationPlugin,
+                    rawLibraryPlugins = extension.rawLibraryPlugins,
+                    rawLibraryUsingApplyFrom = extension.rawLibraryUsingApplyFrom
+                )
+            )
+            val parsedStructure = structureParser.parse(settingsDir)
             val processedScripts = BuildScriptsProcessor.process(parsedStructure)
-            processedScripts
-                .forEach { processed ->
-                    GradleSettingsPatcher.patch(this, processed, extension)
-                    ModuleNamesWriter.write(
-                        folder = ResolveOutputFilesDir.using(settingsDir),
-                        filename = processed.moduleType.conventionedFileName(),
-                        coordinates = processed.coordinates
-                    )
-                }
+            processedScripts.forEach { processed ->
+                GradleSettingsPatcher.patch(this, processed, extension)
+                ModuleNamesWriter.write(
+                    folder = ResolveOutputFilesDir.using(settingsDir),
+                    filename = processed.moduleType.conventionedFileName(),
+                    coordinates = processed.coordinates
+                )
+            }
         }
     }
 

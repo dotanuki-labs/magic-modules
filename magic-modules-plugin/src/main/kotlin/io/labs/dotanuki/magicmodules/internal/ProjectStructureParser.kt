@@ -1,16 +1,18 @@
 package io.labs.dotanuki.magicmodules.internal
 
-import io.labs.dotanuki.magicmodules.MagicModulesExtension
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleFoundModule
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType
 import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
+import io.labs.dotanuki.magicmodules.internal.model.ParserRawContent
 import io.labs.dotanuki.magicmodules.internal.util.e
 import io.labs.dotanuki.magicmodules.internal.util.i
 import io.labs.dotanuki.magicmodules.internal.util.logger
 import java.io.File
 
-internal class ProjectStructureParser(private val magicModulesExtension: MagicModulesExtension) {
+internal class ProjectStructureParser(
+    private val parserRawContent: ParserRawContent
+) {
 
     private val foundedScripts by lazy {
         mutableSetOf<GradleBuildScript>()
@@ -72,22 +74,22 @@ internal class ProjectStructureParser(private val magicModulesExtension: MagicMo
         val pluginFound = PLUGIN_LINE_REGEX.find(line)
         return when {
             pluginFound != null ->
-                GradleFoundModule.AppliedPlugin(line.substring(pluginFound.range.last))
-            magicModulesExtension.rawLibraryUsingApplyFrom.isEmpty() -> null
+                GradleFoundModule.ApplyPlugin(line.substring(pluginFound.range.last))
+            parserRawContent.rawLibraryUsingApplyFrom.isEmpty() -> null
             else -> APPLY_FROM_LINE_REGEX.find(line)?.let { match ->
-                GradleFoundModule.AppliedFrom(line.substring(match.range.last))
+                GradleFoundModule.ApplyFrom(line.substring(match.range.last))
             }
         }
     }
 
     private fun mapFoundModule(module: GradleFoundModule): GradleModuleType? =
-        with(magicModulesExtension) {
+        with(parserRawContent) {
             when (module) {
-                is GradleFoundModule.AppliedFrom -> when {
+                is GradleFoundModule.ApplyFrom -> when {
                     module.isAPlugin(rawLibraryUsingApplyFrom) -> GradleModuleType.LIBRARY
                     else -> null
                 }
-                is GradleFoundModule.AppliedPlugin -> when {
+                is GradleFoundModule.ApplyPlugin -> when {
                     module.isAPlugin(rawApplicationPlugin) -> GradleModuleType.APPLICATION
                     module.isAPlugin(rawLibraryPlugins) -> GradleModuleType.LIBRARY
                     else -> null
