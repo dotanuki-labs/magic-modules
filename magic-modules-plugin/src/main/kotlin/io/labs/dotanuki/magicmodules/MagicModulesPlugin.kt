@@ -25,7 +25,10 @@ class MagicModulesPlugin : Plugin<Settings> {
         gradle.settingsEvaluated {
             val structureParser = ProjectStructureParser(
                 ParserRawContent(
-                    rawApplicationPlugin = extension.rawApplicationPlugin,
+                    maxDepthToBuildScript = extension.maxDepthToBuildScript,
+                    rawApplicationPlugins = extension.rawApplicationPlugins,
+                    rawJavaLibraryPlugins = extension.rawJavaLibraryPlugins,
+                    rawJavaLibraryUsingApplyFrom = extension.rawJavaLibraryUsingApplyFrom,
                     rawLibraryPlugins = extension.rawLibraryPlugins,
                     rawLibraryUsingApplyFrom = extension.rawLibraryUsingApplyFrom
                 )
@@ -36,7 +39,7 @@ class MagicModulesPlugin : Plugin<Settings> {
                 GradleSettingsPatcher.patch(this, processed, extension)
                 ModuleNamesWriter.write(
                     folder = ResolveOutputFilesDir.using(settingsDir),
-                    filename = processed.moduleType.conventionedFileName(),
+                    filename = processed.moduleType.conventionFileName(),
                     coordinates = processed.coordinates
                 )
             }

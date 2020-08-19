@@ -2,9 +2,12 @@ package io.labs.dotanuki.magicmodules
 
 open class MagicModulesExtension {
     var includeApps: Boolean = true
-    var rawApplicationPlugin: List<String> = listOf("com.android.application")
+    var maxDepthToBuildScript: Int = Int.MAX_VALUE
+    var rawApplicationPlugins: List<String> = listOf("com.android.application")
+    var rawJavaLibraryPlugins: List<String> = listOf("jvm", "kotlin")
+    var rawJavaLibraryUsingApplyFrom: List<String> = emptyList()
     var rawLibraryPlugins: List<String> = listOf(
-        "com.android.library", "kotlin", "com.android.dynamic-feature", "jvm"
+        "com.android.library", "com.android.dynamic-feature"
     )
     var rawLibraryUsingApplyFrom: List<String> = emptyList()
 

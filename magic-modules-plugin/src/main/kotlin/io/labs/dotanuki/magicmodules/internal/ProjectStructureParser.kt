@@ -13,18 +13,17 @@ import java.io.File
 internal class ProjectStructureParser(
     private val parserRawContent: ParserRawContent
 ) {
-
-    private val foundedScripts by lazy {
-        mutableSetOf<GradleBuildScript>()
-    }
-
-    private var projectName = NO_NAME_ASSIGNED
-
     fun parse(rootFolder: File): GradleProjectStructure =
         when {
             rootFolder.isDirectory -> {
-                projectName = rootFolder.name
-                deepSearchFirst(rootFolder).also {
+                val foundedScripts = rootFolder.walkTopDown()
+                    .maxDepth(parserRawContent.maxDepthToBuildScript)
+                    .onEnter(::notSkipValidDirectories)
+                    .filter(::isBuildScript)
+                    .map(::mapBuildScriptPathAndType)
+                    .toSet()
+
+                GradleProjectStructure(rootFolder.name, foundedScripts).also {
                     logger().i("Parser :: Project structure parsed with success!")
                     logger().i("Parser :: Project name -> ${it.rootProjectName}")
                     logger().i("Parser :: Total number of Gradle scripts found -> ${it.scripts.size}")
@@ -36,28 +35,6 @@ internal class ProjectStructureParser(
             }
         }
 
-    private fun deepSearchFirst(rootFolder: File): GradleProjectStructure =
-        with(rootFolder) {
-            innerFiles().forEach { innerFile ->
-                when {
-                    innerFile.isDirectory -> deepSearchFirst(innerFile)
-                    else -> evaluateBuildScript(innerFile)
-                }
-            }
-
-            GradleProjectStructure(projectName, foundedScripts)
-        }
-
-    private fun evaluateBuildScript(target: File) {
-        with(target) {
-            if (isBuildScript()) {
-                foundedScripts += GradleBuildScript(path, evaluateProjectType())
-            }
-        }
-    }
-
-    private fun File.innerFiles(): List<File> = listFiles()?.toList() ?: emptyList()
-
     private fun File.evaluateProjectType(): GradleModuleType =
         if (matchesBuildSrc()) GradleModuleType.BUILDSRC
         else readLines().asSequence()
@@ -65,8 +42,9 @@ internal class ProjectStructureParser(
             .mapNotNull(::mapFoundModule)
             .firstOrNull() ?: GradleModuleType.ROOT_LEVEL
 
-    private fun File.isBuildScript(): Boolean =
+    private fun isBuildScript(file: File): Boolean = with(file) {
         path.endsWith("build.gradle") || path.endsWith("build.gradle.kts")
+    }
 
     private fun File.matchesBuildSrc(): Boolean = path.contains("buildSrc")
 
@@ -86,11 +64,13 @@ internal class ProjectStructureParser(
         with(parserRawContent) {
             when (module) {
                 is GradleFoundModule.ApplyFrom -> when {
+                    module.isAPlugin(rawJavaLibraryUsingApplyFrom) -> GradleModuleType.JAVA_LIBRARY
                     module.isAPlugin(rawLibraryUsingApplyFrom) -> GradleModuleType.LIBRARY
                     else -> null
                 }
                 is GradleFoundModule.ApplyPlugin -> when {
-                    module.isAPlugin(rawApplicationPlugin) -> GradleModuleType.APPLICATION
+                    module.isAPlugin(rawApplicationPlugins) -> GradleModuleType.APPLICATION
+                    module.isAPlugin(rawJavaLibraryPlugins) -> GradleModuleType.JAVA_LIBRARY
                     module.isAPlugin(rawLibraryPlugins) -> GradleModuleType.LIBRARY
                     else -> null
                 }
@@ -100,8 +80,14 @@ internal class ProjectStructureParser(
     private fun GradleFoundModule.isAPlugin(plugins: List<String>) =
         plugins.any { plugin -> content.contains(plugin) }
 
+    private fun notSkipValidDirectories(file: File) = with(file) {
+        isHidden.not() && name != "build" && name != "src"
+    }
+
+    private fun mapBuildScriptPathAndType(file: File) =
+        GradleBuildScript(file.path, file.evaluateProjectType())
+
     companion object {
-        private const val NO_NAME_ASSIGNED = ""
         private val APPLY_FROM_LINE_REGEX = """^\s*apply\s*\(?from\s*[:=]\s*['"]?""".toRegex()
         private val PLUGIN_LINE_REGEX =
             """^\s*((apply\s*\(?\s*plugin)|(id\s*[('"])|(kotlin\s*\())""".toRegex()

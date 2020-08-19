@@ -7,6 +7,7 @@ import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleInclude
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.APPLICATION
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.BUILDSRC
+import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.JAVA_LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.ROOT_LEVEL
 import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
@@ -18,7 +19,8 @@ import org.junit.Test
 
 class BuildScriptsProcessorTests {
 
-    @Test fun `should not process when missing buildSrc`() {
+    @Test
+    fun `should not process when missing buildSrc`() {
 
         val projectPath = "/Dev/projects/tweetter"
 
@@ -36,7 +38,8 @@ class BuildScriptsProcessorTests {
         assertThatThrownBy(execution).isEqualTo(MagicModulesError.MissingBuildSrc)
     }
 
-    @Test fun `should process library modules`() {
+    @Test
+    fun `should process library modules`() {
 
         val projectPath = "/home/projects/awesome-grocery"
 
@@ -54,17 +57,18 @@ class BuildScriptsProcessorTests {
         val processed = BuildScriptsProcessor.process(projectStructure)
 
         val expected = listOf(
+            ProcessedScriptsResult(JAVA_LIBRARY, emptyMap()),
             ProcessedScriptsResult(
                 moduleType = LIBRARY,
                 coordinates = mapOf(
-                    CanonicalModuleName("CORE") to GradleModuleInclude(":core"),
-                    CanonicalModuleName("LOGIN") to GradleModuleInclude(":login")
+                    GradleModuleInclude(":core") to listOf(CanonicalModuleName("core")),
+                    GradleModuleInclude(":login") to listOf(CanonicalModuleName("login"))
                 )
             ),
             ProcessedScriptsResult(
                 moduleType = APPLICATION,
                 coordinates = mapOf(
-                    CanonicalModuleName("APP") to GradleModuleInclude(":app")
+                    GradleModuleInclude(":app") to listOf(CanonicalModuleName("app"))
                 )
             )
         )

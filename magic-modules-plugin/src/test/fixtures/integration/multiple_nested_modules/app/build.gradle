@@ -26,5 +26,6 @@ android {
 }
 
 dependencies {
-    Libraries.allAvailable.each { implementation project(it) }
+    LibraryModules.Common.allAvailable.each { implementation project(it) }
+    LibraryModules.Features.allAvailable.each { implementation project(it) }
 }

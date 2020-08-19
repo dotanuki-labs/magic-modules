@@ -14,7 +14,7 @@ import java.io.File
 
 internal object ModuleNamesWriter {
 
-    fun write(folder: File, filename: String, coordinates: Map<CanonicalModuleName, GradleModuleInclude>) {
+    fun write(folder: File, filename: String, coordinates: Map<GradleModuleInclude, List<CanonicalModuleName>>) {
 
         when {
             folder.isFile -> throw MagicModulesError.CantWriteConstantsFile
@@ -25,17 +25,33 @@ internal object ModuleNamesWriter {
 
     private fun generateAndWriteKotlinCode(
         filename: String,
-        coordinates: Map<CanonicalModuleName, GradleModuleInclude>,
+        coordinates: Map<GradleModuleInclude, List<CanonicalModuleName>>,
         target: File
     ) {
-        val objectWithConstantsSpec = TypeSpec.objectBuilder(filename)
-            .apply { coordinates.asConstantsPropertiesSpec().forEach { addProperty(it) } }
-            .addProperty(coordinates.keys.asListPropertySpec())
-            .build()
+        val root = PathNode(
+            value = filename,
+            typeSpec = TypeSpec.objectBuilder(filename)
+        )
+
+        for ((modulePath, modules) in coordinates) {
+            var currentNode = root
+            for (moduleIndex in modules.indices) {
+                when (moduleIndex) {
+                    modules.lastIndex -> {
+                        val propertySpec = modules[moduleIndex].toConstantPropertySpec(modulePath)
+                        currentNode.constants.add(propertySpec.name)
+                        currentNode.typeSpec.addProperty(propertySpec)
+                    }
+                    else -> currentNode = currentNode.getCandidateToBeParent(
+                        module = modules[moduleIndex]
+                    )
+                }
+            }
+        }
 
         val fileSpec = FileSpec.builder(ROOT_PACKAGE, filename)
             .addComment(DO_NOT_EDIT)
-            .addType(objectWithConstantsSpec)
+            .addType(root.buildAndConnectTypes())
             .indent(FOUR_SPACES)
             .build()
 
@@ -43,8 +59,8 @@ internal object ModuleNamesWriter {
         logger().i("Writter :: Wrote $filename.kt at $target")
     }
 
-    private fun Set<CanonicalModuleName>.asListPropertySpec(): PropertySpec =
-        ClassName("kotlin.collections", "List")
+    private fun Set<String>.asListPropertySpec(): PropertySpec =
+        ClassName("kotlin.collections", "Set")
             .parameterizedBy(ClassName("kotlin", "String"))
             .let { parametrizedStringList ->
 
@@ -52,9 +68,7 @@ internal object ModuleNamesWriter {
                     separator = LINE_BY_LINE_SEPARATOR,
                     prefix = LINE_BY_LINE_PREFIX,
                     postfix = LINE_BY_LINE_POSTFIX
-                ) { name ->
-                    name.value
-                }
+                )
 
                 val formatted = "\n${ALL_NAMES_TEMPLATE.replace("<items>", lineByLine).trimIndent()}"
 
@@ -63,18 +77,70 @@ internal object ModuleNamesWriter {
                     .build()
             }
 
-    private fun Map<CanonicalModuleName, GradleModuleInclude>.asConstantsPropertiesSpec(): List<PropertySpec> =
-        map { (name, include) ->
-            PropertySpec.builder(name.value, String::class, KModifier.CONST)
-                .initializer("%S", include.value)
-                .build()
+    private fun PathNode.buildAndConnectTypes(): TypeSpec {
+        children.forEach {
+            typeSpec.addType(it.buildAndConnectTypes())
         }
+        if (constants.isNotEmpty()) {
+            typeSpec.addProperty(constants.asListPropertySpec())
+        }
+        return typeSpec.build()
+    }
+
+    private fun PathNode.getCandidateToBeParent(module: CanonicalModuleName): PathNode {
+        val pathNode = PathNode(
+            value = module.value,
+            typeSpec = module.toObjectTypeSpecWithoutBuild()
+        )
+        return when (val childIndex = children.indexOf(pathNode)) {
+            -1 -> {
+                children.add(pathNode)
+                pathNode
+            }
+            else -> children[childIndex]
+        }
+    }
+
+    private fun CanonicalModuleName.toConstantPropertySpec(module: GradleModuleInclude): PropertySpec =
+        PropertySpec.builder(value.replace("-", "_").toUpperCase(), String::class, KModifier.CONST)
+            .initializer("%S", module.value)
+            .build()
+
+    private fun CanonicalModuleName.toObjectTypeSpecWithoutBuild(): TypeSpec.Builder =
+        TypeSpec.objectBuilder(
+            value.split(NO_NUMBERS_AND_NO_LETTERS)
+                .reduce { accumulated, name -> accumulated + name.capitalize() }
+                .capitalize()
+        )
 
     private const val FOUR_SPACES = "    "
     private const val LINE_BY_LINE_SEPARATOR = ",\n$FOUR_SPACES"
     private const val LINE_BY_LINE_PREFIX = "\n$FOUR_SPACES"
     private const val LINE_BY_LINE_POSTFIX = "\n"
     private const val ROOT_PACKAGE = ""
-    private const val ALL_NAMES_TEMPLATE = "listOf(<items>)"
+    private const val ALL_NAMES_TEMPLATE = "hashSetOf(<items>)"
     private const val DO_NOT_EDIT = "Generated by MagicModules plugin. Mind your Linters!"
+    private val NO_NUMBERS_AND_NO_LETTERS = """[^0-9A-Za-z]""".toRegex()
+
+    private data class PathNode(
+        val value: String,
+        val typeSpec: TypeSpec.Builder,
+        val children: MutableList<PathNode> = mutableListOf(),
+        val constants: MutableSet<String> = mutableSetOf()
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as PathNode
+
+            if (value != other.value) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return value.hashCode()
+        }
+    }
 }
