@@ -128,19 +128,9 @@ internal object ModuleNamesWriter {
         val children: MutableList<PathNode> = mutableListOf(),
         val constants: MutableSet<String> = mutableSetOf()
     ) {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
+        override fun equals(other: Any?): Boolean =
+            this === other || (other is PathNode && other.value == value)
 
-            other as PathNode
-
-            if (value != other.value) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            return value.hashCode()
-        }
+        override fun hashCode(): Int = value.hashCode()
     }
 }

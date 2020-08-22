@@ -16,13 +16,7 @@ internal class ProjectStructureParser(
     fun parse(rootFolder: File): GradleProjectStructure =
         when {
             rootFolder.isDirectory -> {
-                val foundedScripts = rootFolder.walkTopDown()
-                    .maxDepth(parserRawContent.maxDepthToBuildScript)
-                    .onEnter(::notSkipValidDirectories)
-                    .filter(::isBuildScript)
-                    .map(::mapBuildScriptPathAndType)
-                    .toSet()
-
+                val foundedScripts = rootFolder.lookUpBuildScript()
                 GradleProjectStructure(rootFolder.name, foundedScripts).also {
                     logger().i("Parser :: Project structure parsed with success!")
                     logger().i("Parser :: Project name -> ${it.rootProjectName}")
@@ -34,6 +28,13 @@ internal class ProjectStructureParser(
                 throw MagicModulesError.CantParseProjectStructure
             }
         }
+
+    private fun File.lookUpBuildScript() = walkTopDown()
+        .maxDepth(parserRawContent.maxDepthToBuildScript)
+        .onEnter(::notSkipValidDirectories)
+        .filter(::isBuildScript)
+        .map(::mapBuildScriptPathAndType)
+        .toSet()
 
     private fun File.evaluateProjectType(): GradleModuleType =
         if (matchesBuildSrc()) GradleModuleType.BUILDSRC
@@ -61,19 +62,27 @@ internal class ProjectStructureParser(
     }
 
     private fun mapFoundModule(module: GradleFoundModule): GradleModuleType? =
+        when (module) {
+            is GradleFoundModule.ApplyFrom -> module.toType()
+            is GradleFoundModule.ApplyPlugin -> module.toType()
+        }
+
+    private fun GradleFoundModule.ApplyFrom.toType(): GradleModuleType? =
         with(parserRawContent) {
-            when (module) {
-                is GradleFoundModule.ApplyFrom -> when {
-                    module.isAPlugin(rawJavaLibraryUsingApplyFrom) -> GradleModuleType.JAVA_LIBRARY
-                    module.isAPlugin(rawLibraryUsingApplyFrom) -> GradleModuleType.LIBRARY
-                    else -> null
-                }
-                is GradleFoundModule.ApplyPlugin -> when {
-                    module.isAPlugin(rawApplicationPlugins) -> GradleModuleType.APPLICATION
-                    module.isAPlugin(rawJavaLibraryPlugins) -> GradleModuleType.JAVA_LIBRARY
-                    module.isAPlugin(rawLibraryPlugins) -> GradleModuleType.LIBRARY
-                    else -> null
-                }
+            when {
+                isAPlugin(rawJavaLibraryUsingApplyFrom) -> GradleModuleType.JAVA_LIBRARY
+                isAPlugin(rawLibraryUsingApplyFrom) -> GradleModuleType.LIBRARY
+                else -> null
+            }
+        }
+
+    private fun GradleFoundModule.ApplyPlugin.toType(): GradleModuleType? =
+        with(parserRawContent) {
+            when {
+                isAPlugin(rawApplicationPlugins) -> GradleModuleType.APPLICATION
+                isAPlugin(rawJavaLibraryPlugins) -> GradleModuleType.JAVA_LIBRARY
+                isAPlugin(rawLibraryPlugins) -> GradleModuleType.LIBRARY
+                else -> null
             }
         }
 

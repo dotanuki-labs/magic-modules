@@ -52,7 +52,7 @@ This experimental plugin attemps to solve that. It parses a project tree like th
 and
 
 - it automatically includes all founded modules in `settings.gradle`
-- it writes 2 Kotlin files under your `buildSrc/src/main/kotlin` : 
+- it writes 3 Kotlin files under your `buildSrc/src/main/kotlin` : 
 
 `JavaModules.kt`
 
@@ -262,6 +262,10 @@ I realised that
 ## Author
 
 Coded by Ubiratan Soares (follow me on [Twitter](https://twitter.com/ubiratanfsoares))
+
+## Contributors
+
+- Thiago Santos (@programadorthi)
 
 ## License
 

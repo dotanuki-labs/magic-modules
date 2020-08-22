@@ -24,25 +24,19 @@ internal object BuildScriptsProcessor {
             val applications = mutableMapOf<GradleModuleInclude, List<CanonicalModuleName>>()
             var missingBuildSrc = true
 
-            scripts.forEach { script ->
+            for (script in scripts) {
+                if (script.moduleType == BUILDSRC) {
+                    reportSkipped(script)
+                    missingBuildSrc = false
+                    continue
+                }
+
+                val extractor = ExtractCoordinates(rootProjectName, script)
                 when (script.moduleType) {
-                    BUILDSRC -> {
-                        reportSkipped(script)
-                        missingBuildSrc = false
-                    }
-                    else -> {
-                        val extractor = ExtractCoordinates(rootProjectName, script)
-                        when (script.moduleType) {
-                            BUILDSRC -> {
-                                reportSkipped(script)
-                                missingBuildSrc = false
-                            }
-                            JAVA_LIBRARY -> javaLibraries[extractor.gradleInclude()] = extractor.modulePaths()
-                            LIBRARY -> libraries[extractor.gradleInclude()] = extractor.modulePaths()
-                            APPLICATION -> applications[extractor.gradleInclude()] = extractor.modulePaths()
-                            else -> reportSkipped(script)
-                        }
-                    }
+                    JAVA_LIBRARY -> javaLibraries[extractor.gradleInclude()] = extractor.modulePaths()
+                    LIBRARY -> libraries[extractor.gradleInclude()] = extractor.modulePaths()
+                    APPLICATION -> applications[extractor.gradleInclude()] = extractor.modulePaths()
+                    else -> reportSkipped(script)
                 }
             }
 
