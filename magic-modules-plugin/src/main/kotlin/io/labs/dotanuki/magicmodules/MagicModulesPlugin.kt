@@ -46,7 +46,7 @@ class MagicModulesPlugin : Plugin<Settings> {
             GradleSettingsPatcher.patch(this, processed, extension)
             ModuleNamesWriter.write(
                 folder = ResolveOutputFilesDir.using(settingsDir),
-                filename = processed.moduleType.conventionFileName(),
+                moduleType = processed.moduleType,
                 coordinates = processed.coordinates
             )
         }

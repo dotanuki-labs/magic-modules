@@ -8,18 +8,23 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import io.labs.dotanuki.magicmodules.internal.model.CanonicalModuleName
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleInclude
+import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType
 import io.labs.dotanuki.magicmodules.internal.util.i
 import io.labs.dotanuki.magicmodules.internal.util.logger
 import java.io.File
 
 internal object ModuleNamesWriter {
 
-    fun write(folder: File, filename: String, coordinates: Map<GradleModuleInclude, List<CanonicalModuleName>>) {
-
+    fun write(
+        folder: File,
+        moduleType: GradleModuleType,
+        coordinates: Map<GradleModuleInclude, List<CanonicalModuleName>>
+    ) {
         when {
             folder.isFile -> throw MagicModulesError.CantWriteConstantsFile
-            coordinates.isEmpty() -> throw MagicModulesError.CantAcceptModulesNames
-            else -> generateAndWriteKotlinCode(filename, coordinates, folder)
+            coordinates.isEmpty() ->
+                if (moduleType != GradleModuleType.JAVA_LIBRARY) throw MagicModulesError.CantAcceptModulesNames
+            else -> generateAndWriteKotlinCode(moduleType.conventionFileName(), coordinates, folder)
         }
     }
 
