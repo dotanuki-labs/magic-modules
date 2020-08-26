@@ -257,7 +257,6 @@ I need more time in order to figure out if we can have such generated files unde
 I realised that
 
 - It might be useful to configure the output folder/package for `JavaModules.kt`, `LibraryModules.kt` and `ApplicationModules.kt`
-- It might be useful to grab more Gradle build script matchers using the plugin configuration
 
 ## Author
 
