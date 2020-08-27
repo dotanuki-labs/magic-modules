@@ -16,20 +16,21 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable
 import org.junit.Test
+import java.io.File
 
 class BuildScriptsProcessorTests {
 
     @Test
     fun `should not process when missing buildSrc`() {
 
-        val projectPath = "/Dev/projects/tweetter"
+        val projectPath = "${File.separator}Dev${File.separator}projects${File.separator}tweetter"
 
         val projectStructure = GradleProjectStructure(
             "tweetter",
             setOf(
-                GradleBuildScript("$projectPath/build.gradle", ROOT_LEVEL),
-                GradleBuildScript("$projectPath/twetter-app/build.gradle", APPLICATION),
-                GradleBuildScript("$projectPath/twetter-core/build.gradle", LIBRARY)
+                GradleBuildScript("$projectPath${File.separator}build.gradle", ROOT_LEVEL),
+                GradleBuildScript("$projectPath${File.separator}twetter-app${File.separator}build.gradle", APPLICATION),
+                GradleBuildScript("$projectPath${File.separator}twetter-core${File.separator}build.gradle", LIBRARY)
             )
         )
 
@@ -41,16 +42,16 @@ class BuildScriptsProcessorTests {
     @Test
     fun `should process library modules`() {
 
-        val projectPath = "/home/projects/awesome-grocery"
+        val projectPath = "${File.separator}home${File.separator}projects${File.separator}awesome-grocery"
 
         val projectStructure = GradleProjectStructure(
             "awesome-grocery",
             setOf(
-                GradleBuildScript("$projectPath/build.gradle", ROOT_LEVEL),
-                GradleBuildScript("$projectPath/buildSrc/build.gradle.kts", BUILDSRC),
-                GradleBuildScript("$projectPath/core/build.gradle", LIBRARY),
-                GradleBuildScript("$projectPath/login/build.gradle", LIBRARY),
-                GradleBuildScript("$projectPath/app/build.gradle", APPLICATION)
+                GradleBuildScript("$projectPath${File.separator}build.gradle", ROOT_LEVEL),
+                GradleBuildScript("$projectPath${File.separator}buildSrc${File.separator}build.gradle.kts", BUILDSRC),
+                GradleBuildScript("$projectPath${File.separator}core${File.separator}build.gradle", LIBRARY),
+                GradleBuildScript("$projectPath${File.separator}login${File.separator}build.gradle", LIBRARY),
+                GradleBuildScript("$projectPath${File.separator}app${File.separator}build.gradle", APPLICATION)
             )
         )
 
