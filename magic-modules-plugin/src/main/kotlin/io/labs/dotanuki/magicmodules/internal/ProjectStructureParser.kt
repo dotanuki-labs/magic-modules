@@ -89,9 +89,7 @@ internal class ProjectStructureParser(
     private fun GradleFoundModule.isAPlugin(plugins: List<String>) =
         plugins.any { plugin -> content.contains(plugin) }
 
-    private fun notSkipValidDirectories(file: File) = with(file) {
-        isHidden.not() && name != "build" && name != "src"
-    }
+    private fun notSkipValidDirectories(file: File) = file.isHidden.not()
 
     private fun mapBuildScriptPathAndType(file: File) =
         GradleBuildScript(file.path, file.evaluateProjectType())
