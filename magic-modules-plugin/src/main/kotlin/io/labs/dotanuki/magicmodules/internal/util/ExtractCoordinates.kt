@@ -5,6 +5,7 @@ import io.labs.dotanuki.magicmodules.internal.model.CanonicalModuleName
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleInclude
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType
+import java.io.File
 
 internal object ExtractCoordinates {
 
@@ -33,7 +34,7 @@ internal object ExtractCoordinates {
                 throw CantExtractGradleCoordinates
             }
 
-            val segments = splittedPath[1].split("/").drop(1).dropLast(1)
+            val segments = splittedPath[1].split(File.separator).drop(1).dropLast(1)
 
             when (segments.size) {
                 0 -> {
