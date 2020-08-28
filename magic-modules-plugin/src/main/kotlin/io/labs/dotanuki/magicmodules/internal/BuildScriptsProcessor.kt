@@ -5,6 +5,7 @@ import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleInclude
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.APPLICATION
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.BUILDSRC
+import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.JAVA_LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
 import io.labs.dotanuki.magicmodules.internal.model.ProcessedScriptsResult
@@ -18,22 +19,23 @@ internal object BuildScriptsProcessor {
     fun process(projectStructure: GradleProjectStructure): List<ProcessedScriptsResult> =
         with(projectStructure) {
 
-            val libraries = mutableMapOf<CanonicalModuleName, GradleModuleInclude>()
-            val applications = mutableMapOf<CanonicalModuleName, GradleModuleInclude>()
+            val javaLibraries = mutableMapOf<GradleModuleInclude, List<CanonicalModuleName>>()
+            val libraries = mutableMapOf<GradleModuleInclude, List<CanonicalModuleName>>()
+            val applications = mutableMapOf<GradleModuleInclude, List<CanonicalModuleName>>()
             var missingBuildSrc = true
 
-            scripts.forEach { script ->
+            for (script in scripts) {
+                if (script.moduleType == BUILDSRC) {
+                    reportSkipped(script)
+                    missingBuildSrc = false
+                    continue
+                }
 
-                val moduleName = ExtractCoordinates.moduleName(rootProjectName, script)
-                val include = ExtractCoordinates.gradleInclude(rootProjectName, script)
-
+                val extractor = ExtractCoordinates(rootProjectName, script)
                 when (script.moduleType) {
-                    BUILDSRC -> {
-                        reportSkipped(script)
-                        missingBuildSrc = false
-                    }
-                    LIBRARY -> libraries[moduleName] = include
-                    APPLICATION -> applications[moduleName] = include
+                    JAVA_LIBRARY -> javaLibraries[extractor.gradleInclude()] = extractor.modulePaths()
+                    LIBRARY -> libraries[extractor.gradleInclude()] = extractor.modulePaths()
+                    APPLICATION -> applications[extractor.gradleInclude()] = extractor.modulePaths()
                     else -> reportSkipped(script)
                 }
             }
@@ -44,10 +46,12 @@ internal object BuildScriptsProcessor {
             }
 
             logger().i("ScriptsProcessor :: Gradle build scripts processed with success!")
-            logger().i("ScriptsProcessor :: Library modules counted -> ${libraries.size}")
             logger().i("ScriptsProcessor :: Application modules counted -> ${applications.size}")
+            logger().i("ScriptsProcessor :: Java modules counted -> ${javaLibraries.size}")
+            logger().i("ScriptsProcessor :: Library modules counted -> ${libraries.size}")
 
             listOf(
+                ProcessedScriptsResult(JAVA_LIBRARY, javaLibraries),
                 ProcessedScriptsResult(LIBRARY, libraries),
                 ProcessedScriptsResult(APPLICATION, applications)
             )

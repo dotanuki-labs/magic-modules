@@ -14,32 +14,41 @@ import kotlin.system.measureTimeMillis
 
 class MagicModulesPlugin : Plugin<Settings> {
 
-    override fun apply(target: Settings) {
-        logger().i("Processing :: Started")
-        val spent = measureTimeMillis { target.computeModulesAndPatchSettings() }
-        logger().i("Processing :: Done. Processing time -> $spent milliseconds")
-    }
+    override fun apply(target: Settings) =
+        target.computeModulesAndPatchSettings()
 
     private fun Settings.computeModulesAndPatchSettings() {
         val extension = registerPluginExtension()
         gradle.settingsEvaluated {
+            logger().i("Processing :: Started")
             val structureParser = ProjectStructureParser(
                 ParserRawContent(
-                    rawApplicationPlugin = extension.rawApplicationPlugin,
+                    maxDepthToBuildScript = extension.maxDepthToBuildScript,
+                    rawApplicationPlugins = extension.rawApplicationPlugins,
+                    rawJavaLibraryPlugins = extension.rawJavaLibraryPlugins,
+                    rawJavaLibraryUsingApplyFrom = extension.rawJavaLibraryUsingApplyFrom,
                     rawLibraryPlugins = extension.rawLibraryPlugins,
                     rawLibraryUsingApplyFrom = extension.rawLibraryUsingApplyFrom
                 )
             )
-            val parsedStructure = structureParser.parse(settingsDir)
-            val processedScripts = BuildScriptsProcessor.process(parsedStructure)
-            processedScripts.forEach { processed ->
-                GradleSettingsPatcher.patch(this, processed, extension)
-                ModuleNamesWriter.write(
-                    folder = ResolveOutputFilesDir.using(settingsDir),
-                    filename = processed.moduleType.conventionedFileName(),
-                    coordinates = processed.coordinates
-                )
-            }
+            val spent = measureTimeMillis { parseAndProcessScripts(structureParser, extension) }
+            logger().i("Processing :: Done. Processing time -> $spent milliseconds")
+        }
+    }
+
+    private fun Settings.parseAndProcessScripts(
+        structureParser: ProjectStructureParser,
+        extension: MagicModulesExtension
+    ) {
+        val parsedStructure = structureParser.parse(settingsDir)
+        val processedScripts = BuildScriptsProcessor.process(parsedStructure)
+        processedScripts.forEach { processed ->
+            GradleSettingsPatcher.patch(this, processed, extension)
+            ModuleNamesWriter.write(
+                folder = ResolveOutputFilesDir.using(settingsDir),
+                moduleType = processed.moduleType,
+                coordinates = processed.coordinates
+            )
         }
     }
 

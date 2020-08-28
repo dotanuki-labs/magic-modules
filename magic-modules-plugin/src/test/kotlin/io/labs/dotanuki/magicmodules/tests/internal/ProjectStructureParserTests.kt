@@ -7,6 +7,7 @@ import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.APPLICATION
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.BUILDSRC
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.LIBRARY
+import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.JAVA_LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.ROOT_LEVEL
 import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
 import io.labs.dotanuki.magicmodules.internal.model.ParserRawContent
@@ -23,7 +24,10 @@ internal class ProjectStructureParserTests {
     @Before fun `before each test`() {
         val extension = MagicModulesExtension.DEFAULT
         parser = ProjectStructureParser(ParserRawContent(
-            rawApplicationPlugin = extension.rawApplicationPlugin,
+            maxDepthToBuildScript = extension.maxDepthToBuildScript,
+            rawApplicationPlugins = extension.rawApplicationPlugins,
+            rawJavaLibraryPlugins = extension.rawJavaLibraryPlugins,
+            rawJavaLibraryUsingApplyFrom = extension.rawJavaLibraryUsingApplyFrom,
             rawLibraryPlugins = extension.rawLibraryPlugins,
             rawLibraryUsingApplyFrom = extension.rawLibraryUsingApplyFrom
         ))
@@ -74,7 +78,7 @@ internal class ProjectStructureParserTests {
                     GradleBuildScript(resolvePath("build.gradle"), ROOT_LEVEL),
                     GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
                     GradleBuildScript(resolvePath("app/build.gradle"), APPLICATION),
-                    GradleBuildScript(resolvePath("common/build.gradle"), LIBRARY),
+                    GradleBuildScript(resolvePath("common/build.gradle"), JAVA_LIBRARY),
                     GradleBuildScript(resolvePath("feature/build.gradle"), LIBRARY)
                 )
             )
@@ -95,7 +99,7 @@ internal class ProjectStructureParserTests {
                     GradleBuildScript(resolvePath("build.gradle.kts"), ROOT_LEVEL),
                     GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
                     GradleBuildScript(resolvePath("app/build.gradle.kts"), APPLICATION),
-                    GradleBuildScript(resolvePath("common/core/build.gradle.kts"), LIBRARY),
+                    GradleBuildScript(resolvePath("common/core/build.gradle.kts"), JAVA_LIBRARY),
                     GradleBuildScript(resolvePath("common/utils/build.gradle"), LIBRARY),
                     GradleBuildScript(resolvePath("features/profile/build.gradle.kts"), LIBRARY),
                     GradleBuildScript(resolvePath("features/signup/build.gradle.kts"), LIBRARY)
@@ -135,7 +139,10 @@ internal class ProjectStructureParserTests {
         }
         val parsed = ProjectStructureParser(
             ParserRawContent(
-                rawApplicationPlugin = extension.rawApplicationPlugin,
+                maxDepthToBuildScript = extension.maxDepthToBuildScript,
+                rawApplicationPlugins = extension.rawApplicationPlugins,
+                rawJavaLibraryPlugins = extension.rawJavaLibraryPlugins,
+                rawJavaLibraryUsingApplyFrom = extension.rawJavaLibraryUsingApplyFrom,
                 rawLibraryPlugins = extension.rawLibraryPlugins,
                 rawLibraryUsingApplyFrom = extension.rawLibraryUsingApplyFrom
             )

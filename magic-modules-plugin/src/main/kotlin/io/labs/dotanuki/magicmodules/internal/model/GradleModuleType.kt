@@ -6,11 +6,13 @@ internal enum class GradleModuleType {
     BUILDSRC,
     ROOT_LEVEL,
     APPLICATION,
-    LIBRARY;
+    LIBRARY,
+    JAVA_LIBRARY;
 
-    fun conventionedFileName() = when (this) {
-        APPLICATION -> "Applications"
-        LIBRARY -> "Libraries"
+    fun conventionFileName() = when (this) {
+        APPLICATION -> "ApplicationModules"
+        JAVA_LIBRARY -> "JavaModules"
+        LIBRARY -> "LibraryModules"
         else -> throw MagicModulesError.ImpossibleOutputAssociation
     }
 }

@@ -16,16 +16,16 @@ class GradleSettingsPatcherTests {
         ProcessedScriptsResult(
             moduleType = GradleModuleType.LIBRARY,
             coordinates = mapOf(
-                CanonicalModuleName("CORE") to GradleModuleInclude(":core"),
-                CanonicalModuleName("COMMON") to GradleModuleInclude(":common"),
-                CanonicalModuleName("LOGIN") to GradleModuleInclude(":login"),
-                CanonicalModuleName("PROFILE") to GradleModuleInclude(":profile")
+                GradleModuleInclude(":core") to listOf(CanonicalModuleName("CORE")),
+                GradleModuleInclude(":common") to listOf(CanonicalModuleName("COMMON")),
+                GradleModuleInclude(":login") to listOf(CanonicalModuleName("LOGIN")),
+                GradleModuleInclude(":profile") to listOf(CanonicalModuleName("PROFILE"))
             )
         ),
         ProcessedScriptsResult(
             moduleType = GradleModuleType.APPLICATION,
             coordinates = mapOf(
-                CanonicalModuleName("APP") to GradleModuleInclude(":app")
+                GradleModuleInclude(":app") to listOf(CanonicalModuleName("APP"))
             )
         )
     )
