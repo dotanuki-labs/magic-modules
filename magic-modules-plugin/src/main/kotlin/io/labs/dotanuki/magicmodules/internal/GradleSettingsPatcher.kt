@@ -19,6 +19,7 @@ internal object GradleSettingsPatcher {
         with(processedScript) {
             coordinates.keys
                 .map { it.value }
+                .filterNot { gradleInclude -> shouldSkipInclude(extension, gradleInclude) }
                 .forEach { gradleInclude ->
                     when (moduleType) {
                         JAVA_LIBRARY, LIBRARY -> include(target, gradleInclude)
@@ -32,5 +33,14 @@ internal object GradleSettingsPatcher {
     private fun include(target: Settings, gradleInclude: String) {
         target.include(gradleInclude)
         logger().i("Patcher :: Included on settings.gradle -> $gradleInclude")
+    }
+
+    private fun shouldSkipInclude(
+        extension: MagicModulesExtension,
+        gradleInclude: String
+    ): Boolean = extension.modulesToSkip.contains(gradleInclude).also { skipped ->
+        if (skipped) {
+            logger().i("Patcher :: Skipping include on settings.gradle -> $gradleInclude")
+        }
     }
 }
