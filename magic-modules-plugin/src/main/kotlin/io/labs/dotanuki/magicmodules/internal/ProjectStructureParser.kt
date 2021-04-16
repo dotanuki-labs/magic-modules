@@ -54,6 +54,7 @@ internal class ProjectStructureParser(
         return when {
             pluginFound != null ->
                 GradleFoundModule.ApplyPlugin(line.substring(pluginFound.range.last))
+            parserRawContent.rawJavaLibraryUsingApplyFrom.isEmpty() &&
             parserRawContent.rawLibraryUsingApplyFrom.isEmpty() -> null
             else -> APPLY_FROM_LINE_REGEX.find(line)?.let { match ->
                 GradleFoundModule.ApplyFrom(line.substring(match.range.last))
