@@ -4,7 +4,7 @@ import io.labs.dotanuki.magicmodules.internal.model.CanonicalModuleName
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleInclude
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.APPLICATION
-import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.BUILDSRC
+import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.INCLUDE_BUILD
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.JAVA_LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleProjectStructure
@@ -25,7 +25,7 @@ internal object BuildScriptsProcessor {
             var missingBuildSrc = true
 
             for (script in scripts) {
-                if (script.moduleType == BUILDSRC) {
+                if (script.moduleType == INCLUDE_BUILD) {
                     reportSkipped(script)
                     missingBuildSrc = false
                     continue

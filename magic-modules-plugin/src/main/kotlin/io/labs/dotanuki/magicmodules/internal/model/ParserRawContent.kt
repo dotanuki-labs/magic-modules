@@ -1,6 +1,7 @@
 package io.labs.dotanuki.magicmodules.internal.model
 
 internal data class ParserRawContent(
+    val includeBuildDir: String,
     val maxDepthToBuildScript: Int,
     val rawApplicationPlugins: List<String>,
     val rawJavaLibraryPlugins: List<String>,

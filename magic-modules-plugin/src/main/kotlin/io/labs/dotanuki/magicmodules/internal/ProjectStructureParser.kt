@@ -8,6 +8,7 @@ import io.labs.dotanuki.magicmodules.internal.model.ParserRawContent
 import io.labs.dotanuki.magicmodules.internal.util.e
 import io.labs.dotanuki.magicmodules.internal.util.i
 import io.labs.dotanuki.magicmodules.internal.util.logger
+import org.gradle.api.Project
 import java.io.File
 
 internal class ProjectStructureParser(
@@ -37,17 +38,18 @@ internal class ProjectStructureParser(
         .toSet()
 
     private fun File.evaluateProjectType(): GradleModuleType =
-        if (matchesBuildSrc()) GradleModuleType.BUILDSRC
+        if (matchesBuildSrc()) GradleModuleType.INCLUDE_BUILD
         else readLines().asSequence()
             .mapNotNull(::mapScriptLine)
             .mapNotNull(::mapFoundModule)
             .firstOrNull() ?: GradleModuleType.ROOT_LEVEL
 
     private fun isBuildScript(file: File): Boolean = with(file) {
-        path.endsWith("build.gradle") || path.endsWith("build.gradle.kts")
+        path.endsWith(Project.DEFAULT_BUILD_FILE) || path.endsWith("build.gradle.kts")
     }
 
-    private fun File.matchesBuildSrc(): Boolean = path.contains("buildSrc")
+    private fun File.matchesBuildSrc(): Boolean =
+        path.contains(parserRawContent.includeBuildDir)
 
     private fun mapScriptLine(line: String): GradleFoundModule? {
         val pluginFound = PLUGIN_LINE_REGEX.find(line)
