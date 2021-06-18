@@ -42,7 +42,7 @@ class MagicModulesPlugin : Plugin<Settings> {
         extension: MagicModulesExtension
     ) {
         val parsedStructure = structureParser.parse(settingsDir)
-        val processedScripts = BuildScriptsProcessor.process(parsedStructure)
+        val processedScripts = BuildScriptsProcessor.process(parsedStructure, extension)
         processedScripts.forEach { processed ->
             GradleSettingsPatcher.patch(this, processed, extension)
             ModuleNamesWriter.write(

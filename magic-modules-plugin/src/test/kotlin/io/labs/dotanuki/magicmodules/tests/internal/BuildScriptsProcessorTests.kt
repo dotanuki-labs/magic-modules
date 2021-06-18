@@ -1,5 +1,6 @@
 package io.labs.dotanuki.magicmodules.tests.internal
 
+import io.labs.dotanuki.magicmodules.MagicModulesExtension
 import io.labs.dotanuki.magicmodules.internal.BuildScriptsProcessor
 import io.labs.dotanuki.magicmodules.internal.MagicModulesError
 import io.labs.dotanuki.magicmodules.internal.model.CanonicalModuleName
@@ -34,7 +35,7 @@ class BuildScriptsProcessorTests {
             )
         )
 
-        val execution = ThrowingCallable { BuildScriptsProcessor.process(projectStructure) }
+        val execution = ThrowingCallable { BuildScriptsProcessor.process(projectStructure, MagicModulesExtension()) }
 
         assertThatThrownBy(execution).isEqualTo(MagicModulesError.MissingBuildSrc)
     }
@@ -55,7 +56,7 @@ class BuildScriptsProcessorTests {
             )
         )
 
-        val processed = BuildScriptsProcessor.process(projectStructure)
+        val processed = BuildScriptsProcessor.process(projectStructure, MagicModulesExtension())
 
         val expected = listOf(
             ProcessedScriptsResult(JAVA_LIBRARY, emptyMap()),
