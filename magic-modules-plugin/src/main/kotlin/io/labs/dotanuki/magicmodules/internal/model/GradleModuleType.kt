@@ -3,7 +3,7 @@ package io.labs.dotanuki.magicmodules.internal.model
 import io.labs.dotanuki.magicmodules.internal.MagicModulesError
 
 internal enum class GradleModuleType {
-    BUILDSRC,
+    INCLUDE_BUILD,
     ROOT_LEVEL,
     APPLICATION,
     LIBRARY,

@@ -17,18 +17,29 @@ internal class ExtractCoordinates(
             return@with emptyList()
         }
 
+        // With this (GITHUB Actions): /home/runner/work/project-name/project-name
+        // Results:                    [/home/runner/work/, /, /module/build.gradle]
         val splittedPath = filePath.split(rootProjectName)
 
-        if (splittedPath.size != 2) {
-            logger().e("Error -> Can move with splitted path = $splittedPath")
+        if (splittedPath.size < 2) {
+            logger().e("Error -> Can't move with splitted path = $splittedPath")
             throw CantExtractGradleCoordinates
         }
 
-        val segments = splittedPath[1].split(File.separator).drop(1).dropLast(1)
+        // Splitted path:   [/home/runner/work/, /, /module/build.gradle]
+        // last():          /module/build.gradle
+        // split separator: [, module, build.gradle]
+        // drop(1):         [module, build.gradle]
+        // dropLast(1):     [module]
+        val segments = splittedPath
+            .last()
+            .split(File.separator)
+            .drop(1)
+            .dropLast(1)
 
         when (segments.size) {
             0 -> {
-                logger().e("Error -> Can move with path segments = $segments. Splitted path = $splittedPath")
+                logger().e("Error -> Can't move with path segments = $segments. Splitted path = $splittedPath")
                 throw CantExtractGradleCoordinates
             }
             else -> segments

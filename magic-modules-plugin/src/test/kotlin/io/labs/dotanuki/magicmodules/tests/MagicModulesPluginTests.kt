@@ -48,6 +48,13 @@ class MagicModulesPluginTests {
         }
     }
 
+    // FIXME: Tests below are ignored because groovy scripts doesn't support inner classes
+    /* There is two ways to solve it:
+    * 1 - Migrate build.gradle files to kts;
+    * 2 - Generated files with modules (JavaModules.kt, etc...) should be inside a package.
+    * There is an issue about that: https://github.com/gradle/gradle/issues/9251
+    * */
+
     @Ignore @Test fun `should include multiple nested modules`() {
 
         val targetProjectDir = prepareFixture("multiple_nested_modules")
@@ -72,29 +79,44 @@ class MagicModulesPluginTests {
                 import kotlin.String
                 import kotlin.collections.List
                 
-                object Libraries {
-                    const val FEATURES_HOME: String = ":features:home"
+                object JavaModules {
+                    object Common {
+                        const val UTILS: String = ":common:utils"
                 
-                    const val FEATURES_LOGIN: String = ":features:login"
-                
-                    const val COMMON_CORE: String = ":common:core"
-                
-                    const val COMMON_UTILS: String = ":common:utils"
-                
-                    val allAvailable: List<String> = 
-                            listOf(
-                                FEATURES_HOME,
-                                FEATURES_LOGIN,
-                                COMMON_CORE,
-                                COMMON_UTILS
-                            )
+                        val allAvailable: List<String> = 
+                                listOf(
+                                    UTILS
+                                )
+                    }
                 }
                 
             """.trimIndent()
 
-        val generatedCode = targetProjectDir.resolve("buildSrc/src/main/kotlin/Libraries.kt").readText()
+        val generatedCode = targetProjectDir.resolve("buildSrc/src/main/kotlin/JavaModules.kt").readText()
 
         assertThat(mappedLibraries).isEqualTo(generatedCode)
+    }
+
+    @Ignore @Test fun `should include multiple modules and skip some others`() {
+
+        val targetProjectDir = prepareFixture("multiple_nested_modules_with_skip_some")
+
+        val build = GradleRunner.create()
+            .withProjectDir(targetProjectDir)
+            .withPluginClasspath()
+            .withArguments("clean", ":app:assembleDebug", "--info")
+            .build()
+
+        assertThat(build.output).run {
+            contains("Included on settings.gradle -> :features:home")
+            contains("Included on settings.gradle -> :features:login")
+            contains("Included on settings.gradle -> :common:core")
+            contains("Included on settings.gradle -> :common:utils")
+            contains("Included on settings.gradle -> :app")
+            contains("Skipping include on settings.gradle -> :features:home")
+            contains("Skipping include on settings.gradle -> :features:login")
+            contains("BUILD SUCCESS")
+        }
     }
 
     private fun prepareFixture(name: String): File = tempFolder.newFolder().apply {

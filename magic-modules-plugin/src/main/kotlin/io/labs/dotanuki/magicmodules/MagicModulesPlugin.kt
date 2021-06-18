@@ -23,6 +23,7 @@ class MagicModulesPlugin : Plugin<Settings> {
             logger().i("Processing :: Started")
             val structureParser = ProjectStructureParser(
                 ParserRawContent(
+                    includeBuildDir = extension.includeBuildDir,
                     maxDepthToBuildScript = extension.maxDepthToBuildScript,
                     rawApplicationPlugins = extension.rawApplicationPlugins,
                     rawJavaLibraryPlugins = extension.rawJavaLibraryPlugins,
@@ -41,11 +42,11 @@ class MagicModulesPlugin : Plugin<Settings> {
         extension: MagicModulesExtension
     ) {
         val parsedStructure = structureParser.parse(settingsDir)
-        val processedScripts = BuildScriptsProcessor.process(parsedStructure)
+        val processedScripts = BuildScriptsProcessor.process(parsedStructure, extension)
         processedScripts.forEach { processed ->
             GradleSettingsPatcher.patch(this, processed, extension)
             ModuleNamesWriter.write(
-                folder = ResolveOutputFilesDir.using(settingsDir),
+                folder = ResolveOutputFilesDir.using(settingsDir, extension.includeBuildDir),
                 moduleType = processed.moduleType,
                 coordinates = processed.coordinates
             )

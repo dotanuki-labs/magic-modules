@@ -5,7 +5,7 @@ import io.labs.dotanuki.magicmodules.internal.MagicModulesError
 import io.labs.dotanuki.magicmodules.internal.ProjectStructureParser
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.APPLICATION
-import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.BUILDSRC
+import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.INCLUDE_BUILD
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.JAVA_LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.ROOT_LEVEL
@@ -24,6 +24,7 @@ internal class ProjectStructureParserTests {
     @Before fun `before each test`() {
         val extension = MagicModulesExtension.DEFAULT
         parser = ProjectStructureParser(ParserRawContent(
+            includeBuildDir = extension.includeBuildDir,
             maxDepthToBuildScript = extension.maxDepthToBuildScript,
             rawApplicationPlugins = extension.rawApplicationPlugins,
             rawJavaLibraryPlugins = extension.rawJavaLibraryPlugins,
@@ -76,7 +77,7 @@ internal class ProjectStructureParserTests {
                 "multiple_modules_one_level",
                 setOf(
                     GradleBuildScript(resolvePath("build.gradle"), ROOT_LEVEL),
-                    GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
+                    GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), INCLUDE_BUILD),
                     GradleBuildScript(resolvePath("app/build.gradle"), APPLICATION),
                     GradleBuildScript(resolvePath("common/build.gradle"), JAVA_LIBRARY),
                     GradleBuildScript(resolvePath("feature/build.gradle"), LIBRARY)
@@ -97,7 +98,7 @@ internal class ProjectStructureParserTests {
                 "multiple_modules_two_levels",
                 setOf(
                     GradleBuildScript(resolvePath("build.gradle.kts"), ROOT_LEVEL),
-                    GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
+                    GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), INCLUDE_BUILD),
                     GradleBuildScript(resolvePath("app/build.gradle.kts"), APPLICATION),
                     GradleBuildScript(resolvePath("common/core/build.gradle.kts"), JAVA_LIBRARY),
                     GradleBuildScript(resolvePath("common/utils/build.gradle"), LIBRARY),
@@ -120,7 +121,7 @@ internal class ProjectStructureParserTests {
                 "multiple_application_modules",
                 setOf(
                     GradleBuildScript(resolvePath("build.gradle"), ROOT_LEVEL),
-                    GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
+                    GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), INCLUDE_BUILD),
                     GradleBuildScript(resolvePath("app/build.gradle"), APPLICATION),
                     GradleBuildScript(resolvePath("app2/build.gradle"), APPLICATION),
                     GradleBuildScript(resolvePath("app3/build.gradle"), APPLICATION)
@@ -139,6 +140,7 @@ internal class ProjectStructureParserTests {
         }
         val parsed = ProjectStructureParser(
             ParserRawContent(
+                includeBuildDir = extension.includeBuildDir,
                 maxDepthToBuildScript = extension.maxDepthToBuildScript,
                 rawApplicationPlugins = extension.rawApplicationPlugins,
                 rawJavaLibraryPlugins = extension.rawJavaLibraryPlugins,
@@ -153,7 +155,7 @@ internal class ProjectStructureParserTests {
                 "multiple_modules_using_apply_from",
                 setOf(
                     GradleBuildScript(resolvePath("build.gradle"), ROOT_LEVEL),
-                    GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), BUILDSRC),
+                    GradleBuildScript(resolvePath("buildSrc/build.gradle.kts"), INCLUDE_BUILD),
                     GradleBuildScript(resolvePath("app/build.gradle"), APPLICATION),
                     GradleBuildScript(resolvePath("common/build.gradle.kts"), LIBRARY),
                     GradleBuildScript(resolvePath("feature/build.gradle"), LIBRARY)

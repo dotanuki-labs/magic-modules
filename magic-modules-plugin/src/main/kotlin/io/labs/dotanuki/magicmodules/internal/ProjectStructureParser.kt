@@ -8,6 +8,7 @@ import io.labs.dotanuki.magicmodules.internal.model.ParserRawContent
 import io.labs.dotanuki.magicmodules.internal.util.e
 import io.labs.dotanuki.magicmodules.internal.util.i
 import io.labs.dotanuki.magicmodules.internal.util.logger
+import org.gradle.api.Project
 import java.io.File
 
 internal class ProjectStructureParser(
@@ -37,23 +38,26 @@ internal class ProjectStructureParser(
         .toSet()
 
     private fun File.evaluateProjectType(): GradleModuleType =
-        if (matchesBuildSrc()) GradleModuleType.BUILDSRC
+        if (matchesIncludeBuild()) GradleModuleType.INCLUDE_BUILD
         else readLines().asSequence()
             .mapNotNull(::mapScriptLine)
             .mapNotNull(::mapFoundModule)
             .firstOrNull() ?: GradleModuleType.ROOT_LEVEL
 
     private fun isBuildScript(file: File): Boolean = with(file) {
-        path.endsWith("build.gradle") || path.endsWith("build.gradle.kts")
+        path.endsWith(Project.DEFAULT_BUILD_FILE) || path.endsWith("build.gradle.kts")
     }
 
-    private fun File.matchesBuildSrc(): Boolean = path.contains("buildSrc")
+    // Using two separator because we need check directory and not other file that contains the name
+    private fun File.matchesIncludeBuild(): Boolean =
+        path.contains("${File.separator}${parserRawContent.includeBuildDir}${File.separator}")
 
     private fun mapScriptLine(line: String): GradleFoundModule? {
         val pluginFound = PLUGIN_LINE_REGEX.find(line)
         return when {
             pluginFound != null ->
                 GradleFoundModule.ApplyPlugin(line.substring(pluginFound.range.last))
+            parserRawContent.rawJavaLibraryUsingApplyFrom.isEmpty() &&
             parserRawContent.rawLibraryUsingApplyFrom.isEmpty() -> null
             else -> APPLY_FROM_LINE_REGEX.find(line)?.let { match ->
                 GradleFoundModule.ApplyFrom(line.substring(match.range.last))

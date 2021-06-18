@@ -1,12 +1,13 @@
 package io.labs.dotanuki.magicmodules.tests.internal
 
+import io.labs.dotanuki.magicmodules.MagicModulesExtension
 import io.labs.dotanuki.magicmodules.internal.BuildScriptsProcessor
 import io.labs.dotanuki.magicmodules.internal.MagicModulesError
 import io.labs.dotanuki.magicmodules.internal.model.CanonicalModuleName
 import io.labs.dotanuki.magicmodules.internal.model.GradleBuildScript
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleInclude
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.APPLICATION
-import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.BUILDSRC
+import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.INCLUDE_BUILD
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.JAVA_LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.LIBRARY
 import io.labs.dotanuki.magicmodules.internal.model.GradleModuleType.ROOT_LEVEL
@@ -34,7 +35,7 @@ class BuildScriptsProcessorTests {
             )
         )
 
-        val execution = ThrowingCallable { BuildScriptsProcessor.process(projectStructure) }
+        val execution = ThrowingCallable { BuildScriptsProcessor.process(projectStructure, MagicModulesExtension()) }
 
         assertThatThrownBy(execution).isEqualTo(MagicModulesError.MissingBuildSrc)
     }
@@ -48,14 +49,14 @@ class BuildScriptsProcessorTests {
             "awesome-grocery",
             setOf(
                 GradleBuildScript("$projectPath${File.separator}build.gradle", ROOT_LEVEL),
-                GradleBuildScript("$projectPath${File.separator}buildSrc${File.separator}build.gradle.kts", BUILDSRC),
+                GradleBuildScript("$projectPath${File.separator}buildSrc${File.separator}build.gradle.kts", INCLUDE_BUILD),
                 GradleBuildScript("$projectPath${File.separator}core${File.separator}build.gradle", LIBRARY),
                 GradleBuildScript("$projectPath${File.separator}login${File.separator}build.gradle", LIBRARY),
                 GradleBuildScript("$projectPath${File.separator}app${File.separator}build.gradle", APPLICATION)
             )
         )
 
-        val processed = BuildScriptsProcessor.process(projectStructure)
+        val processed = BuildScriptsProcessor.process(projectStructure, MagicModulesExtension())
 
         val expected = listOf(
             ProcessedScriptsResult(JAVA_LIBRARY, emptyMap()),

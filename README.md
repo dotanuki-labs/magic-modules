@@ -225,6 +225,83 @@ This plugin does a best-effort attempt in order to catch all the common cases, b
 - (1) have some strategy to share build logic accross Gradle modules and 
 - (2) applied the `application` or `library` plugin using such shared build logic for your modules
 
+## Customize to your business
+Values below are default already.
+
+```groovy
+magicModules {
+    // Should the plugin include modules that are com.android.application?
+    includeApps = true
+    // The max depth to find a build.gradle/build.gradle.kts. Use this field to optimize deep search
+    maxDepthToBuildScript = Integer.MAX_VALUE
+    // In a monorepo you would like to avoid sync/build some modules. [":module1", ":folder1:module2"].
+    modulesToSkip = []
+    // The plugin names list that says how to identify an application build.gradle/build.gradle.kts.
+    rawApplicationPlugins = ["com.android.application"]
+    // The plugin names list that says how to identify a java library build.gradle/build.gradle.kts.
+    rawJavaLibraryPlugins = ["jvm", "kotlin"]
+    // The plugin names list that says how to identify an android library build.gradle/build.gradle.kts.
+    rawLibraryPlugins = ["com.android.library", "com.android.dynamic-feature"]
+    /**
+     * Some projects reuse configurations using apply from. If so, you can use fields below to determine how to find it.
+     * <pre>
+     *     // any project build.gradle
+     *     apply from: 'java_library_setup.gradle'
+     * </pre>
+     * <pre>
+     *     // any project build.gradle.kts
+     *     apply(from = "android_library_setup.gradle")
+     * </pre>
+     * 
+     * And the content inside cotes will define the project type setting:
+     * 
+     * <code>rawJavaLibraryUsingApplyFrom = ["java_library_setup.gradle"]</code>
+     * <code>rawLibraryUsingApplyFrom = ["android_library_setup.gradle"]</code>
+     */
+    rawJavaLibraryUsingApplyFrom = []
+    rawLibraryUsingApplyFrom = []
+}
+```
+
+or
+
+```kotlin
+configure<MagicModulesExtension> {
+    // Should the plugin include modules that are com.android.application?
+    includeApps = true
+    // The max depth to find a build.gradle/build.gradle.kts. Use this field to optimize deep search
+    maxDepthToBuildScript = Int.MAX_VALUE
+    // In a monorepo you would like to avoid sync/build some modules. listOf(":module1", ":folder1:module2").
+    modulesToSkip = emptyList()
+    // The plugin names list that says how to identify an application build.gradle/build.gradle.kts.
+    rawApplicationPlugins = listOf("com.android.application")
+    // The plugin names list that says how to identify a java library build.gradle/build.gradle.kts.
+    rawJavaLibraryPlugins = listOf("jvm", "kotlin")
+    // The plugin names list that says how to identify an android library build.gradle/build.gradle.kts.
+    rawLibraryPlugins = listOf(
+        "com.android.library", "com.android.dynamic-feature"
+    )
+    /**
+     * Some projects reuse configurations using apply from. If so, you can use fields below to determine how to find it.
+     * <pre>
+     *     // any project build.gradle
+     *     apply from: 'java_library_setup.gradle'
+     * </pre>
+     * <pre>
+     *     // any project build.gradle.kts
+     *     apply(from = "android_library_setup.gradle")
+     * </pre>
+     *
+     * And the content inside cotes will define the project type setting:
+     *
+     * <code>rawJavaLibraryUsingApplyFrom = listOf("java_library_setup.gradle")</code>
+     * <code>rawLibraryUsingApplyFrom = listOf("android_library_setup.gradle")</code>
+     */
+    rawJavaLibraryUsingApplyFrom = emptyList()
+    rawLibraryUsingApplyFrom = emptyList()
+}
+```
+
 ## Building and testing
 
 To build this plugin and publish it locally for testing
@@ -251,6 +328,8 @@ cd sample
 The main limitation I've found with this approach is that - right now - the plugin generates the `JavaModules.kt`, `LibraryModules.kt` and `ApplicationModules.kt` under the main source set of `buildSrc`, which means eventually issues with linters that run for `buildSrc` files.
 
 I need more time in order to figure out if we can have such generated files under `buildSrc/build` somehow.
+
+At now Groovy DSL doesn't recognize inner classes/objects. So using `implementation project(LibraryModules.Common.SOME)` will crash your gradle sync because `Common` is a `LibraryModules` inner object.
 
 ## Further work
 
