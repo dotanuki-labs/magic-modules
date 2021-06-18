@@ -48,9 +48,9 @@ internal class ProjectStructureParser(
         path.endsWith(Project.DEFAULT_BUILD_FILE) || path.endsWith("build.gradle.kts")
     }
 
-    // Using two / because we need check directory and not other file that contains the name
+    // Using two separator because we need check directory and not other file that contains the name
     private fun File.matchesIncludeBuild(): Boolean =
-        path.contains("/${parserRawContent.includeBuildDir}/")
+        path.contains("${File.separator}${parserRawContent.includeBuildDir}${File.separator}")
 
     private fun mapScriptLine(line: String): GradleFoundModule? {
         val pluginFound = PLUGIN_LINE_REGEX.find(line)
