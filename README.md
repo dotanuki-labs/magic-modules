@@ -3,6 +3,8 @@
 
 ![](.github/assets/magicmodules-demo.gif)
 
+# I recommend you migrate to Gradle 7.0 [Type-safe project dependencies](https://docs.gradle.org/7.0/userguide/declaring_dependencies.html#sec:type-safe-project-accessors) that works in the same way as Magic Modules.
+
 ## What is this?
 
 > *Read more in the [blog post](https://ubiratansoares.dev/post/an-experiment-around-gradle-modules-and-settings/)*
