@@ -1,9 +1,11 @@
 # Magic Modules
 [![ktlint](https://img.shields.io/badge/code%20style-%E2%9D%A4-FF4081.svg)](https://ktlint.github.io/) ![Language](https://img.shields.io/github/languages/top/dotanuki-labs/magic-modules?color=blue&logo=kotlin) [![Maintainability](https://api.codeclimate.com/v1/badges/ee4523261a7d56910bd6/maintainability)](https://codeclimate.com/github/dotanuki-labs/magic-modules/maintainability) ![Main](https://github.com/dotanuki-labs/magic-modules/workflows/Main/badge.svg) [![](https://jitpack.io/v/dotanuki-labs/magic-modules.svg)](https://jitpack.io/#dotanuki-labs/magic-modules) ![License](https://img.shields.io/github/license/dotanuki-labs/magic-modules.svg)
 
-![](.github/assets/magicmodules-demo.gif)
+## Deprecation notice
 
-## What is this?
+**This project has been deprecated in favor of [Gradle's type-safe project dependencies](https://docs.gradle.org/7.0/userguide/declaring_dependencies.html#sec:type-safe-project-accessors).**
+
+## What was this?
 
 > *Read more in the [blog post](https://ubiratansoares.dev/post/an-experiment-around-gradle-modules-and-settings/)*
 
